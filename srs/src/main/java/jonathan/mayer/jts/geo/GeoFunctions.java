@@ -1,4 +1,4 @@
-package jonathan.mayer.srs;
+package jonathan.mayer.jts.geo;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -35,8 +35,7 @@ import org.locationtech.proj4j.CoordinateTransform;
 import org.locationtech.proj4j.CoordinateTransformFactory;
 import org.locationtech.proj4j.ProjCoordinate;
 
-import jonathan.mayer.srs.App.GeometryType2;
-import jonathan.mayer.srs.GeoFunctions.Geom;
+
 
 public class GeoFunctions {
 	private static final int NO_SRID = 0;
@@ -212,6 +211,12 @@ public class GeoFunctions {
 		return geom.wrap(GeometryEngine.envelope(geom));
 	}
 
+	public static Geom ST_Centroid(Geom geom) {
+		Geometry result = GeometryEngine.centroid(geom);
+		return geom.wrap(result);
+	}
+	
+	
 	/** Returns whether {@code geom1} contains {@code geom2}. */
 	public static boolean ST_Contains(Geom geom1, Geom geom2) {
 		return GeometryEngine.contains(geom1, geom2);

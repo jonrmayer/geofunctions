@@ -1,7 +1,4 @@
-package jonathan.mayer.SpatialReference;
-
-import jonathan.mayer.srs.GeoFunctions;
-import jonathan.mayer.srs.GeoFunctions.Geom;
+package jonathan.mayer.jts.geo.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -10,6 +7,9 @@ import java.math.BigDecimal;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import jonathan.mayer.jts.geo.GeoFunctions;
+import jonathan.mayer.jts.geo.GeoFunctions.Geom;
 
 public class buffer {
 
