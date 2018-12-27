@@ -15,12 +15,12 @@ public class App {
 
 	public static void main(String[] args) {
 //		CoordinateTransformFactory mCtFactory = new CoordinateTransformFactory();
-		Geom g = GeoFunctions.ST_GeomFromText("POINT(50 50)");
+		Geom g = GeoFunctions.ST_GeomFromText("POINT(50 50)",4326);
 		Geom gb = GeoFunctions.ST_Buffer(g, Double.parseDouble("10"));
 		byte[] wkb = GeoFunctions.ST_AsWKB(g);
 //		GetTypeCode BY name 
 		Geom ggg = GeoFunctions.ST_GeomFromWKB(wkb);
-		System.out.println(GeoFunctions.ST_CoordDim(GeoFunctions.ST_GeomFromText("LINESTRING(40 50, 0 10)")));
+		System.out.println(GeoFunctions.ST_Transform(g,27700).g().toString());
 //		gt.name()
 //		GeometryType gt = GeometryType.LINESTRING;//GeometryType.convertStringToGType("POLYGON");
 ////		int iGType = gt.getGTypeAsInt();
