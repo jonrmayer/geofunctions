@@ -47,8 +47,7 @@ public class properties {
 	@Test
 	public void ST_GeometryType() {
 		// GeoFunctions.ST_GeometryType(geom)
-		// assertEquals("LINESTRING",GeoFunctions.ST_GeometryType(GeoFunctions.ST_GeomFromText("LINESTRING(1
-		// 3, 5 3)")));
+		 assertEquals("LINESTRING",GeoFunctions.ST_GeometryType(GeoFunctions.ST_GeomFromText("LINESTRING(1 3, 5 3)")));
 		// assertEquals(true,GeoFunctions.ST_Equals(GeoFunctions.ST_GeomFromText("LINESTRING(1
 		// 3, 5 3)"),GeoFunctions.ST_GeomFromText("LINESTRING(1 3, 5 3)")));
 		// assertEquals("POLYGON ((0 0, 0 3, 1 3, 1 0, 0
@@ -62,8 +61,7 @@ public class properties {
 	@Test
 	public void ST_GeometryTypeCode() {
 		// GeoFunctions.ST_GeometryTypeCode(geom)
-		// assertEquals(3,GeoFunctions.ST_GeometryTypeCode(GeoFunctions.ST_GeomFromText("LINESTRING(1
-		// 3, 5 3)")));
+		 assertEquals(3,GeoFunctions.ST_GeometryTypeCode(GeoFunctions.ST_GeomFromText("LINESTRING(1 3, 5 3)")));
 		// assertEquals(true,GeoFunctions.ST_Equals(GeoFunctions.ST_GeomFromText("LINESTRING(1
 		// 3, 5 3)"),GeoFunctions.ST_GeomFromText("LINESTRING(1 3, 5 3)")));
 		// assertEquals("POLYGON ((0 0, 0 3, 1 3, 1 0, 0
@@ -90,7 +88,7 @@ public class properties {
 
 //		GeoFunctions.ST_X(geom)
 		Geom g = GeoFunctions.ST_PointFromText("POINT(40 50)");
-//		assertEquals(Double.toString("40")),GeoFunctions.ST_X(g).toString();
+		assertEquals("40.0",Double.toString(GeoFunctions.ST_X(g)));
 		
 	}
 	@Test
@@ -99,7 +97,7 @@ public class properties {
 //		GeoFunctions.ST_Within(geom1, geom2)
 		
 		Geom g = GeoFunctions.ST_PointFromText("POINT(40 50)");
-//		assertEquals(Double.parseDouble("50"),GeoFunctions.ST_Y(g).doubleValue());
+		assertEquals("50.0",Double.toString(GeoFunctions.ST_Y(g)));
 		
 	}
 	@Test
@@ -108,7 +106,7 @@ public class properties {
 //		GeoFunctions.ST_Z(geom)
 		
 		Geom g = GeoFunctions.ST_PointFromText("POINT(40 50 0)");
-//		assertEquals(Double.parseDouble("0"),GeoFunctions.ST_Z(g).doubleValue());
+		assertEquals("0.0",Double.toString(GeoFunctions.ST_Z(g)));
 		
 	}
 

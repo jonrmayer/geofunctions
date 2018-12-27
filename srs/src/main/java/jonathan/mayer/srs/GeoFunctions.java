@@ -4,8 +4,11 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.locationtech.jts.geom.Coordinate;
@@ -21,6 +24,8 @@ import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKBReader;
+import org.locationtech.jts.io.WKBWriter;
 import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
 import org.locationtech.jts.operation.union.UnaryUnionOp;
@@ -30,6 +35,7 @@ import org.locationtech.proj4j.CoordinateTransform;
 import org.locationtech.proj4j.CoordinateTransformFactory;
 import org.locationtech.proj4j.ProjCoordinate;
 
+import jonathan.mayer.srs.App.GeometryType2;
 import jonathan.mayer.srs.GeoFunctions.Geom;
 
 public class GeoFunctions {
@@ -49,6 +55,10 @@ public class GeoFunctions {
 
 	public static String ST_AsWKT(Geom g) {
 		return GeometryEngine.geometryToWkt(g.g());
+	}
+	
+	public static byte[] ST_AsWKB(Geom g) {
+		return GeometryEngine.geometryToWkb(g.g());
 	}
 
 	public static Geom ST_GeomFromText(String s) {
@@ -178,12 +188,12 @@ public class GeoFunctions {
 
 	/** Returns the type of {@code geom}. */
 	public static String ST_GeometryType(Geom geom) {
-		return GeometryEngine.GetTypeName(geom);
+		return GeometryEngine.typename(geom);
 	}
 
 	/** Returns the OGC SFS type code of {@code geom}. */
 	public static int ST_GeometryTypeCode(Geom geom) {
-		return GeometryEngine.GetTypeCode(geom);
+		return GeometryEngine.typecode(geom);
 	}
 
 	/**
@@ -304,6 +314,10 @@ public class GeoFunctions {
 
 		private static final WKTReader wkr = new WKTReader();
 		private static final WKTWriter wkw = new WKTWriter();
+		
+		private static final WKBReader wkbr = new WKBReader();
+		private static final WKBWriter wkbw = new WKBWriter();
+		
 		private static final GeometryFactory geometryFactory = new GeometryFactory();
 
 		private static UnsupportedOperationException err() {
@@ -316,6 +330,15 @@ public class GeoFunctions {
 			}
 			String wkt = wkw.write(geometry);
 			return wkt;
+		}
+		
+		public static byte[] geometryToWkb(Geometry geometry) {
+			if (geometry == null) {
+				return null;
+			}
+			
+			byte[] wkb = wkbw.write(geometry);
+			return wkb;
 		}
 
 		public static Geometry geometryFromWkt(String wkt, GeometryType geometrytype) {
@@ -622,19 +645,19 @@ public class GeoFunctions {
 			return result;
 		}
 
-		public static int GetTypeCode(Geom geom) {
+		public static int typecode(Geom geom) {
 
 			String gname = geom.g().getGeometryType().toUpperCase();
-
-			return GeometryType.convertStringToGType(gname).getGTypeAsInt();
+			return GeometryType.valueOf(gname).code;
+			
 
 		}
 
-		public static String GetTypeName(Geom geom) {
+		public static String typename(Geom geom) {
 
 			String gname = geom.g().getGeometryType().toUpperCase();
 
-			return GeometryType.convertStringToGType(gname).getGTypeAsString();
+			return GeometryType.valueOf(gname).name();
 
 		}
 	}
@@ -789,59 +812,34 @@ public class GeoFunctions {
 	}
 
 	public enum GeometryType {
-		UNKNOWN(0), GEOMETRY(1), POINT(2), LINESTRING(3), POLYGON(4), MULTIPOINT(5), MULTILINESTRING(6), MULTIPOLYGON(
-				7);
+		UNKNOWN(0), 
+		GEOMETRY(1),
+		POINT(2),
+		LINESTRING(3),
+		POLYGON(4),
+		MULTIPOINT(5),
+		MULTILINESTRING(6),
+		MULTIPOLYGON(7);
 
-		private final int gtype;
+		private static final Map<Integer,GeometryType> lookup 
+	      = new HashMap<Integer,GeometryType>();
 
-		GeometryType(int gtype) {
-			this.gtype = gtype;
-		}
+		static {
+		      for(GeometryType s : EnumSet.allOf(GeometryType.class))
+		           lookup.put(s.getCode(), s);
+		 }
+		
+		private int code;
 
-		public int getGTypeAsInt() {
-			return gtype;
-		}
+		 private GeometryType(int code) {
+		      this.code = code;
+		 }
 
-		public String getGTypeAsString() {
-			return String.valueOf(gtype);
-		}
+		 public int getCode() { return code; }
 
-		public GeometryType convertIntToColor(int igtype) {
-			for (GeometryType g : GeometryType.values()) {
-				if (g.getGTypeAsInt() == igtype) {
-					return g;
-				}
-			}
-			return null;
-		}
-
-		public static GeometryType convertStringToGType(String input) {
-			for (GeometryType g : GeometryType.values()) {
-				if (g.getGTypeAsString().equals(input)) {
-					return g;
-				}
-			}
-			return null;
-		}
-
-		public int convertGTypeToInt(GeometryType input) {
-			for (GeometryType g : GeometryType.values()) {
-				if (g.getGTypeAsInt() == input.getGTypeAsInt()) {
-					return g.getGTypeAsInt();
-				}
-			}
-			return -1;
-		}
-
-		public String convertGTypeToString(GeometryType input) {
-			for (GeometryType g : GeometryType.values()) {
-				if (g.getGTypeAsInt() == input.getGTypeAsInt()) {
-					return g.getGTypeAsString();
-				}
-			}
-			return null;
-		}
-
+		 public static GeometryType get(int code) { 
+		      return lookup.get(code); 
+		 }
 	}
 
 	// // GeometryType Enum - END

@@ -130,6 +130,14 @@ public class predicates {
 
 //		GeoFunctions.ST_Within(geom1, geom2)
 		
+		Geom smallc = GeoFunctions.ST_Buffer(GeoFunctions.ST_GeomFromText("POINT(50 50)"),Double.parseDouble("20"));
+		Geom bigc = GeoFunctions.ST_Buffer(GeoFunctions.ST_GeomFromText("POINT(50 50)"),Double.parseDouble("40"));
+		assertEquals(true, GeoFunctions.ST_Within(smallc,smallc));
+		assertEquals(true, GeoFunctions.ST_Within(smallc,bigc));
+		assertEquals(false, GeoFunctions.ST_Within(bigc,smallc));
+		assertEquals(true, GeoFunctions.ST_Within(GeoFunctions.ST_Union(smallc,bigc),bigc));
+		assertEquals(true, GeoFunctions.ST_Within(bigc,GeoFunctions.ST_Union(smallc,bigc)));
+		
 	}
 	
 }

@@ -12,13 +12,21 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class convert {
-
+	
 	@Test
 	public void ST_AsText() {
 		assertEquals("POINT (40 50)", GeoFunctions.ST_AsText(GeoFunctions.ST_GeomFromText("POINT(40 50)")));
 		assertNotEquals("POINT (40 51)", GeoFunctions.ST_AsText(GeoFunctions.ST_GeomFromText("POINT(40 50)")));
 	}
-
+	@Test
+	public void ST_AsWKB() {
+		
+		Geom g = GeoFunctions.ST_GeomFromText("POINT(40 50)");
+		
+		byte[] b = GeoFunctions.ST_AsWKB(g);
+		assertEquals("POINT (40 50)", GeoFunctions.ST_AsText(GeoFunctions.ST_GeomFromText("POINT(40 50)")));
+		assertNotEquals("POINT (40 51)", GeoFunctions.ST_AsText(GeoFunctions.ST_GeomFromText("POINT(40 50)")));
+	}
 	@Test
 	public void ST_AsWKT() {
 		assertEquals("POINT (40 50)", GeoFunctions.ST_AsWKT(GeoFunctions.ST_GeomFromText("POINT(40 50)")));
@@ -36,31 +44,6 @@ public class convert {
 
 	}
 
-	@Test
-	public void ST_MakeLine() {
-		// GeoFunctions.ST_MakeLine(geoms)
-		assertEquals("LINESTRING (0 0, 1 0)", GeoFunctions
-				.ST_MakeLine(GeoFunctions.ST_PointFromText("POINT(0 0)"), GeoFunctions.ST_PointFromText("POINT(1 0)"))
-				.g().toString());
-		assertEquals("LINESTRING (0 0, 1 0, 50 50)",
-				GeoFunctions.ST_MakeLine(GeoFunctions.ST_PointFromText("POINT(0 0)"),
-						GeoFunctions.ST_PointFromText("POINT(1 0)"), GeoFunctions.ST_PointFromText("POINT(50 50)")).g()
-						.toString());
-
-	}
-
-	@Test
-	public void ST_MakePoint() {
-
-		// GeoFunctions.ST_MakePoint(x, y, z)
-		// GeoFunctions.ST_MakePoint(x, y)
-
-		assertEquals("POINT (1 0)", GeoFunctions.ST_MakePoint(new BigDecimal(1), new BigDecimal(0)).g().toString());
-//		assertEquals("POINT (1 0 0)", GeoFunctions.ST_AsWKT(GeoFunctions.ST_MakePoint(new BigDecimal(1), new BigDecimal(0), new BigDecimal(0))));
-		//
-
-	}
-	
 	@Test
 	public void ST_MLineFromText() {
 

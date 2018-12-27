@@ -1,6 +1,11 @@
 package jonathan.mayer.srs;
 
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
+
 import jonathan.mayer.srs.GeoFunctions.Geom;
+import jonathan.mayer.srs.GeoFunctions.GeometryType;
 
 /**
  * Hello world!
@@ -10,14 +15,17 @@ public class App {
 
 	public static void main(String[] args) {
 //		CoordinateTransformFactory mCtFactory = new CoordinateTransformFactory();
-		Geom geo1 =GeoFunctions.ST_PolyFromText("POLYGON((743238 2967416,743238 2967450,743265 2967450,743265.625 2967416,743238 2967416))",2249);
-//		Geom geo2 =GeoFunctions.ST_SetSRID(geo1, 2249);
-		Geom geo3 =GeoFunctions.ST_Boundary(GeoFunctions.ST_GeomFromText("POINT(40 50)"));
-//		Double d = ST_Distance(ST_GeomFromText("POINT(10 10)",4326),ST_GeomFromText("POINT(10 10)",4326))
-////		Geom geo1 = GeoFunctions.ST_PolyFromText(
-////				"POLYGON((743238 2967416,743238 2967450,743265 2967450,743265.625 2967416,743238 2967416))", 2249);
-////		GeometryTransform.transform(geo1.g(), 27700);
-		System.out.println(geo3.g().toString());
+		Geom g = GeoFunctions.ST_GeomFromText("POINT(50 50)");
+		Geom gb = GeoFunctions.ST_Buffer(g, Double.parseDouble("10"));
+//		GetTypeCode BY name 
+	
+		System.out.println(gb.g().toString());
+//		gt.name()
+//		GeometryType gt = GeometryType.LINESTRING;//GeometryType.convertStringToGType("POLYGON");
+////		int iGType = gt.getGTypeAsInt();
+////		String strGType = gt.getGTypeAsString();
+////		strGType = GeometryType.convertGTypeToString(GeometryType.GEOMETRY);
+//		System.out.println(gt.name() + " " + gt.ordinal() + " " + GeometryType.valueOf("LINESTRING"));
 		// Geometry geometry = GeometryTransform.transform(geo1, 27700);
 		// System.out.println(geometry.toString());
 		// Geom geo2 = GeoFunctions.ST_PointFromText("POINT(1 1)", 4326);
@@ -28,6 +36,37 @@ public class App {
 		// GeoFunctions.ST_Is3D(aaa);
 		// System.out.println(GeoFunctions.ST_Union(aaa,GeoFunctions.ST_Buffer(result,
 		// Double.parseDouble("10"))).g().toString());
+	}
+	
+	public enum GeometryType2 {
+		UNKNOWN(0), 
+		GEOMETRY(1),
+		POINT(2),
+		LINESTRING(3),
+		POLYGON(4),
+		MULTIPOINT(5),
+		MULTILINESTRING(6),
+		MULTIPOLYGON(7);
+		
+		private static final Map<Integer,GeometryType2> lookup 
+	      = new HashMap<Integer,GeometryType2>();
+
+		static {
+		      for(GeometryType2 s : EnumSet.allOf(GeometryType2.class))
+		           lookup.put(s.getCode(), s);
+		 }
+		
+		private int code;
+
+		 private GeometryType2(int code) {
+		      this.code = code;
+		 }
+
+		 public int getCode() { return code; }
+
+		 public static GeometryType2 get(int code) { 
+		      return lookup.get(code); 
+		 }
 	}
 
 }	
