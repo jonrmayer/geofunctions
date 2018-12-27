@@ -29,13 +29,13 @@ import org.locationtech.jts.io.WKBWriter;
 import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
 import org.locationtech.jts.operation.union.UnaryUnionOp;
+import org.locationtech.jts.algorithm.MinimumBoundingCircle;
+import org.locationtech.jts.algorithm.MinimumDiameter;
 import org.locationtech.proj4j.CRSFactory;
 import org.locationtech.proj4j.CoordinateReferenceSystem;
 import org.locationtech.proj4j.CoordinateTransform;
 import org.locationtech.proj4j.CoordinateTransformFactory;
 import org.locationtech.proj4j.ProjCoordinate;
-
-
 
 public class GeoFunctions {
 	private static final int NO_SRID = 0;
@@ -47,9 +47,11 @@ public class GeoFunctions {
 	private static UnsupportedOperationException todo() {
 		return new UnsupportedOperationException();
 	}
+
 	public static double ST_Area(Geom geom1) {
 		return GeometryEngine.getarea(geom1);
 	}
+
 	public static String ST_AsText(Geom g) {
 		return ST_AsWKT(g);
 	}
@@ -61,12 +63,12 @@ public class GeoFunctions {
 	public static byte[] ST_AsWKB(Geom g) {
 		return GeometryEngine.geometryToWkb(g.g());
 	}
-	
-	
+
 	public static Geom ST_GeomFromWKB(byte[] b) {
 		final Geometry g = GeometryEngine.geometryFromWkb(b, GeometryType.GEOMETRY);
 		return bind(g, NO_SRID);
 	}
+
 	public static Geom ST_GeomFromText(String s) {
 		return ST_GeomFromText(s, NO_SRID);
 	}
@@ -129,6 +131,20 @@ public class GeoFunctions {
 		final Geometry g = GeometryEngine.geometryFromWkt(wkt, GeometryType.MULTIPOLYGON);
 		return bind(g, srid);
 	}
+	
+	
+	
+	public static int ST_NumGeometries(Geom geom) {
+		return GeometryEngine.numgeometries(geom);
+	}
+	
+	public static int ST_NPoints(Geom geom) {
+		return GeometryEngine.numpoints(geom);
+	}
+	
+	public static int ST_NumPoints(Geom geom) {
+		return GeometryEngine.numpoints(geom);
+	}
 
 	// Creation
 
@@ -144,14 +160,32 @@ public class GeoFunctions {
 
 		return GeometryEngine.makePoint(x.doubleValue(), y.doubleValue());
 	}
+	
+	public static Geom ST_MinimumRectangle(Geom geom) {
+
+		return GeometryEngine.minimumRectangle(geom);
+	}
+	
 
 	public static Geom ST_Point(BigDecimal x, BigDecimal y, BigDecimal z) {
 
 		return GeometryEngine.makePoint(x.doubleValue(), y.doubleValue(), z.doubleValue());
 	}
 
+	public static Geom ST_MakeEnvelope(double xmin, double ymin, double xmax, double ymax, int srid) {
+
+		Geometry result = GeometryEngine.makeEnvelope(xmin, ymin, xmax, ymax, srid);
+		return new SimpleGeom(result);
+	}
+
 	public static Geom ST_MakeLine(Geom... geoms) {
-		return GeometryEngine.makeLine(geoms);
+		
+		Collection<Geometry> colgeoms = new ArrayList<Geometry>();
+		for (Geom geom : geoms) {
+			colgeoms.add(geom.g());
+		}
+		Geometry result = GeometryEngine.makeLine(colgeoms);
+		return new SimpleGeom(result);
 	}
 
 	// Geometry properties (2D and 3D) ==========================================
@@ -183,7 +217,19 @@ public class GeoFunctions {
 
 	public static Geom ST_Boundary(Geom geom) {
 
-		Geometry result = GeometryEngine.getBoundary(geom);
+		Geometry result = GeometryEngine.getBoundary(geom.g());
+		return geom.wrap(result);
+	}
+
+	public static Geom ST_BoundingCircle(Geom geom) {
+
+		Geometry result = GeometryEngine.boundingcircle(geom.g());
+		return geom.wrap(result);
+	}
+
+	public static Geom ST_BoundingCircleCenter(Geom geom) {
+
+		Geometry result = GeometryEngine.boundingcirclecenter(geom.g());
 		return geom.wrap(result);
 	}
 
@@ -199,7 +245,7 @@ public class GeoFunctions {
 
 	/** Returns the OGC SFS type code of {@code geom}. */
 	public static int ST_GeometryTypeCode(Geom geom) {
-		return GeometryEngine.typecode(geom);
+		return GeometryEngine.typecode(geom.g());
 	}
 
 	/**
@@ -208,89 +254,95 @@ public class GeoFunctions {
 	 */
 	public static Geom ST_Envelope(Geom geom) {
 
-		return geom.wrap(GeometryEngine.envelope(geom));
+		return geom.wrap(GeometryEngine.envelope(geom.g()));
 	}
 
 	public static Geom ST_Centroid(Geom geom) {
-		Geometry result = GeometryEngine.centroid(geom);
+		Geometry result = GeometryEngine.centroid(geom.g());
 		return geom.wrap(result);
 	}
-	
-	
+
 	/** Returns whether {@code geom1} contains {@code geom2}. */
 	public static boolean ST_Contains(Geom geom1, Geom geom2) {
-		return GeometryEngine.contains(geom1, geom2);
+		return GeometryEngine.contains(geom1.g(), geom2.g());
 	}
 
 	public static boolean ST_ContainsProperly(Geom geom1, Geom geom2) {
-		return GeometryEngine.contains(geom1, geom2) && !GeometryEngine.crosses(geom1, geom2);
+		return GeometryEngine.contains(geom1.g(), geom2.g()) && !GeometryEngine.crosses(geom1.g(), geom2.g());
 	}
-	
+
 	public static int ST_CoordDim(Geom geom1) {
-		return GeometryEngine.coorddim(geom1);
+		return GeometryEngine.coorddim(geom1.g());
 	}
+
 	public static boolean ST_Crosses(Geom geom1, Geom geom2) {
-		return GeometryEngine.crosses(geom1, geom2);
+		return GeometryEngine.crosses(geom1.g(), geom2.g());
 	}
 
 	private static boolean ST_Covers(Geom geom1, Geom geom2) {
-		return GeometryEngine.covers(geom1, geom2);
+		return GeometryEngine.covers(geom1.g(), geom2.g());
+	
 	}
 
 	public static boolean ST_Intersects(Geom geom1, Geom geom2) {
-		return GeometryEngine.intersects(geom1, geom2);
+		return GeometryEngine.intersects(geom1.g(), geom2.g());
 	}
 
 	public static boolean ST_EnvelopesIntersect(Geom geom1, Geom geom2) {
-		return GeometryEngine.envelopeintersects(geom1, geom2);
+		return GeometryEngine.envelopeintersects(geom1.g(), geom2.g());
+	
 	}
 
 	public static boolean ST_Disjoint(Geom geom1, Geom geom2) {
-		return GeometryEngine.disjoint(geom1, geom2);
+		return GeometryEngine.disjoint(geom1.g(), geom2.g());
 	}
 
 	public static boolean ST_Equals(Geom geom1, Geom geom2) {
-		return GeometryEngine.equals(geom1, geom2);
+		return GeometryEngine.equals(geom1.g(), geom2.g());
 	}
 
 	public static boolean ST_Overlaps(Geom geom1, Geom geom2) {
-		return GeometryEngine.overlaps(geom1, geom2);
+		return GeometryEngine.overlaps(geom1.g(), geom2.g());
 	}
 
 	public static boolean ST_Touches(Geom geom1, Geom geom2) {
-		return GeometryEngine.touches(geom1, geom2);
+		return GeometryEngine.touches(geom1.g(), geom2.g());
 	}
 
 	/** Returns whether {@code geom1} is within {@code geom2}. */
 	public static boolean ST_Within(Geom geom1, Geom geom2) {
-		return GeometryEngine.within(geom1, geom2);
+		return GeometryEngine.within(geom1.g(), geom2.g());
 	}
 
 	public static boolean ST_DWithin(Geom geom1, Geom geom2, double distance) {
-		return GeometryEngine.dwithin(geom1, geom2, distance);
+		return GeometryEngine.dwithin(geom1.g(), geom2.g(), distance);
 	}
 
 	/** Computes a buffer around {@code geom}. */
 	public static Geom ST_Buffer(Geom geom, Double distance) {
-		Geometry g = GeometryEngine.buffer(geom, distance);
+		Geometry g = GeometryEngine.buffer(geom.g(), distance);
 		return geom.wrap(g);
 	}
 
 	/** Computes a buffer around {@code geom} with . */
 	public static Geom ST_Buffer(Geom geom, double distance, int quadSegs) {
-		Geometry g = GeometryEngine.buffer(geom, distance, quadSegs);
+		Geometry g = GeometryEngine.buffer(geom.g(), distance, quadSegs);
 		return geom.wrap(g);
 	}
 
 	/** Computes a buffer around {@code geom} with . */
 	public static Geom ST_Buffer(Geom geom, double distance, String style) {
-		Geometry g = GeometryEngine.buffer(geom, distance);
+		Geometry g = GeometryEngine.buffer(geom.g(), distance);
 		return geom.wrap(g);
 	}
 
 	public static Geom ST_Union(Geom... geoms) {
 		SpatialReference sr = geoms[0].sr();
-		Geometry g = GeometryEngine.union(geoms);
+		Collection<Geometry> colgeoms = new ArrayList<Geometry>();
+		for (Geom geom : geoms) {
+			colgeoms.add(geom.g());
+		}
+		Geometry g = GeometryEngine.union(colgeoms);
 		return bind(g, sr);
 
 	}
@@ -298,14 +350,14 @@ public class GeoFunctions {
 	public static Geom ST_SetSRID(Geom geom, int srid) {
 		SpatialReference sr = SpatialReference.create(srid);
 
-		Geometry g = GeometryEngine.setsrid(geom, srid);
+		Geometry g = GeometryEngine.setsrid(geom.g(), srid);
 		return bind(g, sr);
 
 	}
 
 	public static Geom ST_Transform(Geom geom, int srid) {
 		SpatialReference sr = SpatialReference.create(srid);
-		Geometry g = GeometryEngine.transform(geom, srid);
+		Geometry g = GeometryEngine.transform(geom.g(), srid);
 		return bind(g, sr);
 
 	}
@@ -354,6 +406,7 @@ public class GeoFunctions {
 			byte[] wkb = wkbw.write(geometry);
 			return wkb;
 		}
+
 		public static Geometry geometryFromWkb(byte[] wkb, GeometryType geometrytype) {
 			if (wkb == null) {
 				return null;
@@ -365,7 +418,7 @@ public class GeoFunctions {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 			switch (geometrytype) {
 			case GEOMETRY:
 
@@ -408,9 +461,9 @@ public class GeoFunctions {
 
 			}
 			return geom;
-			
-			
+
 		}
+
 		public static Geometry geometryFromWkt(String wkt, GeometryType geometrytype) {
 			if (wkt == null) {
 				return null;
@@ -487,26 +540,28 @@ public class GeoFunctions {
 
 		}
 
-		public static Geometry buffer(Geom geom, Double distance) {
+		public static Geometry buffer(Geometry geom, Double distance) {
 			if (geom == null) {
 				return null;
 			}
-			return geom.g().buffer(distance);
+			return geom.buffer(distance);
 		}
 
-		public static Geometry buffer(Geom geom, Double distance, int quadrantSegments) {
+		public static Geometry buffer(Geometry geom, Double distance, int quadrantSegments) {
 			if (geom == null) {
 				return null;
 			}
-			return geom.g().buffer(distance, quadrantSegments);
+			return geom.buffer(distance, quadrantSegments);
 		}
-		public static Geometry centroid(Geom geom) {
+
+		public static Geometry centroid(Geometry geom) {
 			if (geom == null) {
 				return null;
 			}
-			return geom.g().getCentroid();
+			return geom.getCentroid();
 		}
-		public static Geometry transform(Geom geom, int srid) {
+
+		public static Geometry transform(Geometry geom, int srid) {
 			if (geom == null) {
 				return null;
 			}
@@ -515,28 +570,24 @@ public class GeoFunctions {
 			return result;
 		}
 
-		public static Geometry setsrid(Geom geom, int srid) {
+		public static Geometry setsrid(Geometry geom, int srid) {
 			if (geom == null) {
 				return null;
 			}
 
-			Geometry result = geom.g().copy();
+			Geometry result = geom.copy();
 			result.setSRID(srid);
 
 			return result;
 		}
 
-		public static Geometry union(Geom[] geoms) {
+		public static Geometry union(Collection<Geometry> geoms) {
 			if (geoms == null) {
 				return null;
 			}
 
-			Collection<Geometry> colgeoms = new ArrayList<Geometry>();
-			for (Geom geom : geoms) {
-				colgeoms.add(geom.g());
-			}
-
-			return UnaryUnionOp.union(colgeoms);
+			
+			return UnaryUnionOp.union(geoms);
 
 		}
 
@@ -547,79 +598,81 @@ public class GeoFunctions {
 		// }
 		// return geom.g().buffer(distance,endCapStyle);
 		// }
-		public static Boolean touches(Geom geom1, Geom geom2) {
+		public static Boolean touches(Geometry geom1, Geometry geom2) {
 			if (geom1 == null || geom2 == null) {
 				return null;
 			}
-			return geom1.g().touches(geom2.g());
+			return geom1.touches(geom2);
 		}
 
-		public static Boolean within(Geom geom1, Geom geom2) {
+		public static Boolean within(Geometry geom1, Geometry geom2) {
 			if (geom1 == null || geom2 == null) {
 				return null;
 			}
-			return geom1.g().within(geom2.g());
+			return geom1.within(geom2);
 		}
 
-		public static Boolean dwithin(Geom geom1, Geom geom2, Double distance) {
+		public static Boolean dwithin(Geometry geom1, Geometry geom2, Double distance) {
 			if (geom1 == null || geom2 == null) {
 				return null;
 			}
-			return geom1.g().isWithinDistance(geom2.g(), distance);
+			return geom1.isWithinDistance(geom2, distance);
 		}
 
-		public static Boolean overlaps(Geom geom1, Geom geom2) {
+		public static Boolean overlaps(Geometry geom1, Geometry geom2) {
 			if (geom1 == null || geom2 == null) {
 				return null;
 			}
-			return geom1.g().overlaps(geom2.g());
+			return geom1.overlaps(geom2);
 		}
 
-		public static Boolean equals(Geom geom1, Geom geom2) {
+		public static Boolean equals(Geometry geom1, Geometry geom2) {
 			if (geom1 == null || geom2 == null) {
 				return null;
 			}
-			return geom1.g().equals(geom2.g());
+			return geom1.equals(geom2);
 		}
 
-		public static Boolean intersects(Geom geom1, Geom geom2) {
+		public static Boolean intersects(Geometry geom1, Geometry geom2) {
 			if (geom1 == null || geom2 == null) {
 				return null;
 			}
-			return geom1.g().intersects(geom2.g());
+			return geom1.intersects(geom2);
 		}
 
-		public static Boolean envelopeintersects(Geom geom1, Geom geom2) {
+		public static Boolean envelopeintersects(Geometry geom1, Geometry geom2) {
 			if (geom1 == null || geom2 == null) {
 				return null;
 			}
-			return geom1.g().getEnvelopeInternal().intersects(geom2.g().getEnvelopeInternal());
+			return geom1.getEnvelopeInternal().intersects(geom2.getEnvelopeInternal());
 		}
 
-		public static Boolean crosses(Geom geom1, Geom geom2) {
+		public static Boolean crosses(Geometry geom1, Geometry geom2) {
 			if (geom1 == null || geom2 == null) {
 				return null;
 			}
-			return geom1.g().crosses(geom2.g());
+			return geom1.crosses(geom2);
 		}
 
-		public static Boolean disjoint(Geom geom1, Geom geom2) {
+		public static Boolean disjoint(Geometry geom1, Geometry geom2) {
 			if (geom1 == null || geom2 == null) {
 				return null;
 			}
-			return geom1.g().disjoint(geom2.g());
+			return geom1.disjoint(geom2);
 		}
 
-		public static Boolean covers(Geom geom1, Geom geom2) {
+		public static Boolean covers(Geometry geom1, Geometry geom2) {
 			if (geom1 == null || geom2 == null) {
 				return null;
 			}
-			return geom1.g().covers(geom2.g());
+			return geom1.covers(geom2);
 		}
-		public static int coorddim(Geom geom) {
-			return geom.g().getDimension();
+
+		public static int coorddim(Geometry geom) {
+			return geom.getDimension();
 		}
-		public static Boolean contains(Geom geom1, Geom geom2) {
+
+		public static Boolean contains(Geometry geom1, Geometry geom2) {
 			boolean result = false;
 			if (geom1 == null) {
 				return null;
@@ -627,22 +680,22 @@ public class GeoFunctions {
 			if (geom2 == null) {
 				return false;
 			}
-			result = geom1.g().contains(geom2.g());
+			result = geom1.contains(geom2);
 			return result;
 		}
 
-		public static Geometry envelope(Geom geom) {
+		public static Geometry envelope(Geometry geom) {
 			if (geom == null) {
 				return null;
 			}
-			return geom.g().getEnvelope();
+			return geom.getEnvelope();
 		}
 
-		public static Geometry getBoundary(Geom geom) {
+		public static Geometry getBoundary(Geometry geom) {
 			if (geom == null) {
 				return null;
 			}
-			return geom.g().getBoundary();
+			return geom.getBoundary();
 		}
 
 		public static Geom makePoint(double x, double y) {
@@ -657,6 +710,48 @@ public class GeoFunctions {
 			return new SimpleGeom(g);
 		}
 
+		public static Geom minimumRectangle(Geom geom) {
+			if (geom == null) {
+				return null;
+			}
+			final Geometry g = new MinimumDiameter(geom.g()).getMinimumRectangle();
+			
+			return new SimpleGeom(g);
+		}
+		
+		public static int numpoints(Geom geom) {
+			if (geom == null) {
+				return 0;
+			}
+			
+			return geom.g().getNumPoints();
+		}
+		
+		public static int nrings(Geom geom) {
+			if (geom == null) {
+				return 0;
+			}
+			
+			
+			
+//			geom.g().
+			String typename = typename(geom);
+			if(typename=="POLYGON" || typename=="MULTIPOLYGON") {
+				
+			}else {
+				return 0;
+			}
+			
+			return geom.g().getNumPoints();
+		}
+
+		public static int numgeometries(Geom geom) {
+			if (geom == null) {
+				return 0;
+			}
+			
+			return geom.g().getNumGeometries();
+		}
 		public static Point createPoint(double x, double y) {
 			return createPoint(x, y, Coordinate.NULL_ORDINATE);
 		}
@@ -683,11 +778,13 @@ public class GeoFunctions {
 
 		}
 
-		public static Geom makeLine(Geom... geoms) {
-
+		public static Geometry makeLine(Collection<Geometry> geomcoll) {
+			
+			
+			Geometry[] geoms =geomcoll.toArray(new Geometry[geomcoll.size()]);
 			int totalpoints = 0;
-			for (Geom geom : geoms) {
-				totalpoints += pointCount(geom.g());
+			for (Geometry geom : geomcoll) {
+				totalpoints += pointCount(geom);
 			}
 			if (totalpoints < 2) {
 				return null;
@@ -695,25 +792,51 @@ public class GeoFunctions {
 			LineString g = null;
 			Geometry p1 = null;
 			if (geoms.length == 1) {
-				p1 = geoms[0].g();
+				p1 = geoms[0];
 				if (!p1.getGeometryType().equalsIgnoreCase("MULTIPOINT")) {
 					return null;
 				} else {
 					p1 = p1.getGeometryN(0);
 				}
 			} else {
-				p1 = geoms[0].g();
+				p1 = geoms[0];
 			}
 
 			List<Coordinate> coordinateList = new LinkedList<Coordinate>();
 
-			for (Geom geom : geoms) {
-				totalpoints += pointCount(geom.g());
-				addCoordinates(geom.g(), coordinateList);
+			for (Geometry geom : geoms) {
+				totalpoints += pointCount(geom);
+				addCoordinates(geom, coordinateList);
 			}
 			g = p1.getFactory().createLineString(coordinateList.toArray(new Coordinate[geoms.length]));
 
-			return new SimpleGeom(g);
+			return g;
+		}
+
+		public static Geometry makeEnvelope(double xmin, double ymin, double xmax, double ymax, int srid) {
+
+			Coordinate[] coordArray = new Coordinate[] { new Coordinate(xmin, ymin), new Coordinate(xmax, ymin),
+					new Coordinate(xmax, ymax), new Coordinate(xmin, ymax), new Coordinate(xmin, ymin) };
+
+			Geometry geom = geometryFactory.createPolygon(coordArray);
+			geom.setSRID(srid);
+			return geom;
+		}
+
+		public static Geometry boundingcircle(Geometry geom) {
+			if (geom == null) {
+				return null;
+			}
+			return new MinimumBoundingCircle(geom).getCircle();
+		}
+
+		public static Geometry boundingcirclecenter(Geometry geom) {
+			if (geom == null) {
+				return null;
+			}
+			
+
+			return geom.getFactory().createPoint(new MinimumBoundingCircle(geom).getCentre());
 		}
 
 		private static void addCoordinates(Geometry p1, List<Coordinate> list) {
@@ -740,9 +863,9 @@ public class GeoFunctions {
 			return result;
 		}
 
-		public static int typecode(Geom geom) {
+		public static int typecode(Geometry geom) {
 
-			String gname = geom.g().getGeometryType().toUpperCase();
+			String gname = geom.getGeometryType().toUpperCase();
 			return GeometryType.valueOf(gname).code;
 
 		}
@@ -764,15 +887,15 @@ public class GeoFunctions {
 		public GeometryTransform() {
 		}
 
-		public static Geometry transform(Geom geom, int srid) {
+		public static Geometry transform(Geometry geom, int srid) {
 
 			Geometry result = null;
-			int geomsrid = geom.g().getSRID();
+			int geomsrid = geom.getSRID();
 
 			CoordinateReferenceSystem fromcrs = crs(geomsrid);
 			CoordinateReferenceSystem tocrs = crs(srid);
 			CoordinateTransform trans = ctf.createTransform(fromcrs, tocrs);
-			result = transformGeometry(trans, geom.g());
+			result = transformGeometry(trans, geom);
 
 			return result;
 
