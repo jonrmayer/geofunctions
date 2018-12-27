@@ -495,7 +495,12 @@ public class GeoFunctions {
 			}
 			return geom.g().buffer(distance, quadrantSegments);
 		}
-
+		public static Geometry centroid(Geom geom) {
+			if (geom == null) {
+				return null;
+			}
+			return geom.g().getCentroid();
+		}
 		public static Geometry transform(Geom geom, int srid) {
 			if (geom == null) {
 				return null;
