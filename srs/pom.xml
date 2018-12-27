@@ -12,15 +12,11 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		 <esri-geometry-api.version>2.2.0</esri-geometry-api.version>
+		
 	</properties>
 
 	<dependencies>
-	<dependency>
-        <groupId>com.esri.geometry</groupId>
-        <artifactId>esri-geometry-api</artifactId>
-        <version>${esri-geometry-api.version}</version>
-      </dependency>
+	
 		<dependency>
 			<groupId>org.locationtech.proj4j</groupId>
 			<artifactId>proj4j</artifactId>
