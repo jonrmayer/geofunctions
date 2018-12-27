@@ -94,6 +94,33 @@ public class properties {
 
 	
 	@Test
+	public void ST_NPoints() {
+		// GeoFunctions.ST_Is3D(geom)
+		Geom g =GeoFunctions.ST_GeomFromText("POINT(0 0 0)");
+		assertEquals(1, GeoFunctions.ST_NPoints(g));
+		
+
+	}
+	
+	@Test
+	public void ST_NumPoints() {
+		// GeoFunctions.ST_Is3D(geom)
+		Geom g =GeoFunctions.ST_GeomFromText("POINT(0 0 0)");
+		assertEquals(1, GeoFunctions.ST_NumPoints(g));
+		
+
+	}
+	
+	@Test
+	public void ST_NumGeometries() {
+		// GeoFunctions.ST_Is3D(geom)
+		Geom g =GeoFunctions.ST_GeomFromText("MULTIPOINT((0 0),(1 1))");
+		assertEquals(2, GeoFunctions.ST_NumGeometries(g));
+		
+
+	}
+	
+	@Test
 	public void ST_X() {
 
 //		GeoFunctions.ST_X(geom)
