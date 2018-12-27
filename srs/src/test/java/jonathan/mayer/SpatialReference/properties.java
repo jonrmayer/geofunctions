@@ -12,7 +12,14 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class properties {
-
+	
+	
+	
+	@Test
+	public void ST_Area() {
+		Geom gb = GeoFunctions.ST_Buffer(GeoFunctions.ST_GeomFromText("POINT(50 50)"),Double.parseDouble("10"));
+		assertEquals("312.14451522580526", Double.toString(GeoFunctions.ST_Area(gb)));
+	}
 	
 	@Test
 	public void ST_Boundary() {
@@ -28,7 +35,10 @@ public class properties {
 	}
 
 	
-
+	@Test
+	public void ST_CoordDim() {
+		
+	}
 	@SuppressWarnings("deprecation")
 	@Test
 	public void ST_Distance() {
@@ -61,7 +71,7 @@ public class properties {
 	@Test
 	public void ST_GeometryTypeCode() {
 		// GeoFunctions.ST_GeometryTypeCode(geom)
-		 assertEquals(3,GeoFunctions.ST_GeometryTypeCode(GeoFunctions.ST_GeomFromText("LINESTRING(1 3, 5 3)")));
+		 assertEquals(2,GeoFunctions.ST_GeometryTypeCode(GeoFunctions.ST_GeomFromText("LINESTRING(1 3, 5 3)")));
 		// assertEquals(true,GeoFunctions.ST_Equals(GeoFunctions.ST_GeomFromText("LINESTRING(1
 		// 3, 5 3)"),GeoFunctions.ST_GeomFromText("LINESTRING(1 3, 5 3)")));
 		// assertEquals("POLYGON ((0 0, 0 3, 1 3, 1 0, 0

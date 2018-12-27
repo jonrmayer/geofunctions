@@ -48,7 +48,9 @@ public class GeoFunctions {
 	private static UnsupportedOperationException todo() {
 		return new UnsupportedOperationException();
 	}
-
+	public static double ST_Area(Geom geom1) {
+		return GeometryEngine.getarea(geom1);
+	}
 	public static String ST_AsText(Geom g) {
 		return ST_AsWKT(g);
 	}
@@ -56,17 +58,22 @@ public class GeoFunctions {
 	public static String ST_AsWKT(Geom g) {
 		return GeometryEngine.geometryToWkt(g.g());
 	}
-	
+
 	public static byte[] ST_AsWKB(Geom g) {
 		return GeometryEngine.geometryToWkb(g.g());
 	}
-
+	
+	
+	public static Geom ST_GeomFromWKB(byte[] b) {
+		final Geometry g = GeometryEngine.geometryFromWkb(b, GeometryType.GEOMETRY);
+		return bind(g, NO_SRID);
+	}
 	public static Geom ST_GeomFromText(String s) {
 		return ST_GeomFromText(s, NO_SRID);
 	}
 
 	public static Geom ST_GeomFromText(String s, int srid) {
-		final Geometry g = GeometryEngine.geometryFromWkt(s, GeometryType.UNKNOWN);
+		final Geometry g = GeometryEngine.geometryFromWkt(s, GeometryType.GEOMETRY);
 		return bind(g, srid);
 	}
 
@@ -213,7 +220,10 @@ public class GeoFunctions {
 	public static boolean ST_ContainsProperly(Geom geom1, Geom geom2) {
 		return GeometryEngine.contains(geom1, geom2) && !GeometryEngine.crosses(geom1, geom2);
 	}
-
+	
+	public static int ST_CoordDim(Geom geom1) {
+		return GeometryEngine.coorddim(geom1);
+	}
 	public static boolean ST_Crosses(Geom geom1, Geom geom2) {
 		return GeometryEngine.crosses(geom1, geom2);
 	}
@@ -279,22 +289,21 @@ public class GeoFunctions {
 		return bind(g, sr);
 
 	}
-	
+
 	public static Geom ST_SetSRID(Geom geom, int srid) {
 		SpatialReference sr = SpatialReference.create(srid);
-		
-		Geometry g = GeometryEngine.setsrid(geom,srid);
+
+		Geometry g = GeometryEngine.setsrid(geom, srid);
 		return bind(g, sr);
 
 	}
+
 	public static Geom ST_Transform(Geom geom, int srid) {
 		SpatialReference sr = SpatialReference.create(srid);
-		Geometry g = GeometryEngine.transform(geom,srid);
+		Geometry g = GeometryEngine.transform(geom, srid);
 		return bind(g, sr);
 
 	}
-	
-	
 
 	protected static Geom bind(Geometry geometry, int srid) {
 		if (geometry == null) {
@@ -314,10 +323,10 @@ public class GeoFunctions {
 
 		private static final WKTReader wkr = new WKTReader();
 		private static final WKTWriter wkw = new WKTWriter();
-		
+
 		private static final WKBReader wkbr = new WKBReader();
 		private static final WKBWriter wkbw = new WKBWriter();
-		
+
 		private static final GeometryFactory geometryFactory = new GeometryFactory();
 
 		private static UnsupportedOperationException err() {
@@ -331,16 +340,72 @@ public class GeoFunctions {
 			String wkt = wkw.write(geometry);
 			return wkt;
 		}
-		
+
 		public static byte[] geometryToWkb(Geometry geometry) {
 			if (geometry == null) {
 				return null;
 			}
-			
+
 			byte[] wkb = wkbw.write(geometry);
 			return wkb;
 		}
+		public static Geometry geometryFromWkb(byte[] wkb, GeometryType geometrytype) {
+			if (wkb == null) {
+				return null;
+			}
+			Geometry geom = null;
+			try {
+				geom = wkbr.read(wkb);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			switch (geometrytype) {
+			case GEOMETRY:
 
+				break;
+			case POINT:
+				if (!geom.getGeometryType().equalsIgnoreCase("point")) {
+					throw err();
+				}
+				break;
+			case LINESTRING:
+				if (!geom.getGeometryType().equalsIgnoreCase("linestring")) {
+					throw err();
+				}
+				break;
+			case POLYGON:
+				if (!geom.getGeometryType().equalsIgnoreCase("polygon")) {
+					throw err();
+				}
+				break;
+			case MULTIPOINT:
+				if (!geom.getGeometryType().equalsIgnoreCase("MULTIPOINT")) {
+					throw err();
+				}
+				break;
+
+			case MULTILINESTRING:
+				if (!geom.getGeometryType().equalsIgnoreCase("MULTILINESTRING")) {
+					throw err();
+				}
+				break;
+
+			case MULTIPOLYGON:
+				if (!geom.getGeometryType().equalsIgnoreCase("MULTIPOLYGON")) {
+					throw err();
+				}
+				break;
+
+			default:
+				throw err();
+
+			}
+			return geom;
+			
+			
+		}
 		public static Geometry geometryFromWkt(String wkt, GeometryType geometrytype) {
 			if (wkt == null) {
 				return null;
@@ -354,7 +419,7 @@ public class GeoFunctions {
 			}
 
 			switch (geometrytype) {
-			case UNKNOWN:
+			case GEOMETRY:
 
 				break;
 			case POINT:
@@ -439,12 +504,12 @@ public class GeoFunctions {
 			Geometry result = GeometryTransform.transform(geom, srid);
 			return result;
 		}
-		
+
 		public static Geometry setsrid(Geom geom, int srid) {
-			if (geom == null ) {
+			if (geom == null) {
 				return null;
 			}
-			
+
 			Geometry result = geom.g().copy();
 			result.setSRID(srid);
 
@@ -541,7 +606,9 @@ public class GeoFunctions {
 			}
 			return geom1.g().covers(geom2.g());
 		}
-
+		public static int coorddim(Geom geom) {
+			return geom.g().getDimension();
+		}
 		public static Boolean contains(Geom geom1, Geom geom2) {
 			boolean result = false;
 			if (geom1 == null) {
@@ -586,6 +653,24 @@ public class GeoFunctions {
 
 		private static Point createPoint(double x, double y, double z) {
 			return geometryFactory.createPoint(new Coordinate(x, y, z));
+		}
+
+		public static Geometry[] accum(Geom[] geoms) {
+
+			return null;
+
+		}
+
+		public static Geometry[] collect(Geom[] geoms) {
+
+			return null;
+
+		}
+
+		public static Double getarea(Geom geom) {
+
+			return geom.g().getArea();
+
 		}
 
 		public static Geom makeLine(Geom... geoms) {
@@ -649,7 +734,6 @@ public class GeoFunctions {
 
 			String gname = geom.g().getGeometryType().toUpperCase();
 			return GeometryType.valueOf(gname).code;
-			
 
 		}
 
@@ -674,7 +758,7 @@ public class GeoFunctions {
 
 			Geometry result = null;
 			int geomsrid = geom.g().getSRID();
-			
+
 			CoordinateReferenceSystem fromcrs = crs(geomsrid);
 			CoordinateReferenceSystem tocrs = crs(srid);
 			CoordinateTransform trans = ctf.createTransform(fromcrs, tocrs);
@@ -791,8 +875,9 @@ public class GeoFunctions {
 
 	public static class SpatialReference {
 		private static final CRSFactory crsFactory = new CRSFactory();
-		public  static  CoordinateReferenceSystem crs;
-		public  static   int  wkid;
+		public static CoordinateReferenceSystem crs;
+		public static int wkid;
+
 		public SpatialReference() {
 		}
 
@@ -806,46 +891,45 @@ public class GeoFunctions {
 
 			return sr;
 		}
+
 		public int GetSRID() {
 			return wkid;
 		}
 	}
 
 	public enum GeometryType {
-		UNKNOWN(0), 
-		GEOMETRY(1),
-		POINT(2),
-		LINESTRING(3),
-		POLYGON(4),
-		MULTIPOINT(5),
-		MULTILINESTRING(6),
-		MULTIPOLYGON(7);
+		// UNKNOWN(0),
+		GEOMETRY(0), POINT(1), LINESTRING(2), POLYGON(3), MULTIPOINT(4), MULTILINESTRING(5), MULTIPOLYGON(
+				6), GEOMETRYCOLLECTION(7);
 
-		private static final Map<Integer,GeometryType> lookup 
-	      = new HashMap<Integer,GeometryType>();
+		private static final Map<Integer, GeometryType> lookup = new HashMap<Integer, GeometryType>();
 
 		static {
-		      for(GeometryType s : EnumSet.allOf(GeometryType.class))
-		           lookup.put(s.getCode(), s);
-		 }
-		
+			for (GeometryType s : EnumSet.allOf(GeometryType.class))
+				lookup.put(s.getCode(), s);
+		}
+
 		private int code;
 
-		 private GeometryType(int code) {
-		      this.code = code;
-		 }
+		private GeometryType(int code) {
+			this.code = code;
+		}
 
-		 public int getCode() { return code; }
+		public int getCode() {
+			return code;
+		}
 
-		 public static GeometryType get(int code) { 
-		      return lookup.get(code); 
-		 }
+		public static GeometryType get(int code) {
+			return lookup.get(code);
+		}
 	}
 
 	// // GeometryType Enum - END
 	public static interface Geom {
 		Geometry g();
+
 		SpatialReference sr();
+
 		Geom wrap(Geometry g);
 	}
 
@@ -856,7 +940,7 @@ public class GeoFunctions {
 
 		public MapGeometry(Geometry g, SpatialReference _sr) {
 			m_geometry = g;
-			
+
 			sr = _sr;
 			m_geometry.setSRID(getSRID());
 		}
@@ -876,7 +960,6 @@ public class GeoFunctions {
 		public SpatialReference getSpatialReference() {
 			return sr;
 		}
-
 
 		public int getSRID() {
 			return this.sr.GetSRID();
@@ -899,8 +982,6 @@ public class GeoFunctions {
 			return mg.getGeometry();
 		}
 
-
-
 		public Geom wrap(Geometry g) {
 			return bind(g, this.mg.getSpatialReference());
 		}
@@ -909,7 +990,6 @@ public class GeoFunctions {
 
 			return mg.getSpatialReference();
 		}
-
 
 	}
 
@@ -929,7 +1009,6 @@ public class GeoFunctions {
 			return g;
 		}
 
-
 		public Geom wrap(Geometry g) {
 			return new SimpleGeom(g);
 		}
@@ -938,7 +1017,6 @@ public class GeoFunctions {
 			// TODO Auto-generated method stub
 			return SPATIAL_REFERENCE;
 		}
-
 
 	}
 }

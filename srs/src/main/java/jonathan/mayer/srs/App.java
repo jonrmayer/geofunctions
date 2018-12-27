@@ -17,9 +17,10 @@ public class App {
 //		CoordinateTransformFactory mCtFactory = new CoordinateTransformFactory();
 		Geom g = GeoFunctions.ST_GeomFromText("POINT(50 50)");
 		Geom gb = GeoFunctions.ST_Buffer(g, Double.parseDouble("10"));
+		byte[] wkb = GeoFunctions.ST_AsWKB(g);
 //		GetTypeCode BY name 
-	
-		System.out.println(gb.g().toString());
+		Geom ggg = GeoFunctions.ST_GeomFromWKB(wkb);
+		System.out.println(GeoFunctions.ST_CoordDim(GeoFunctions.ST_GeomFromText("LINESTRING(40 50, 0 10)")));
 //		gt.name()
 //		GeometryType gt = GeometryType.LINESTRING;//GeometryType.convertStringToGType("POLYGON");
 ////		int iGType = gt.getGTypeAsInt();

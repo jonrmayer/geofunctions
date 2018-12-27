@@ -21,18 +21,25 @@ public class convert {
 	@Test
 	public void ST_AsWKB() {
 		
-		Geom g = GeoFunctions.ST_GeomFromText("POINT(40 50)");
 		
-		byte[] b = GeoFunctions.ST_AsWKB(g);
-		assertEquals("POINT (40 50)", GeoFunctions.ST_AsText(GeoFunctions.ST_GeomFromText("POINT(40 50)")));
-		assertNotEquals("POINT (40 51)", GeoFunctions.ST_AsText(GeoFunctions.ST_GeomFromText("POINT(40 50)")));
+		assertEquals("POINT (40 50)", GeoFunctions.ST_GeomFromWKB(GeoFunctions.ST_AsWKB(GeoFunctions.ST_GeomFromText("POINT(40 50)"))).g().toString());
+		
+		
 	}
 	@Test
 	public void ST_AsWKT() {
 		assertEquals("POINT (40 50)", GeoFunctions.ST_AsWKT(GeoFunctions.ST_GeomFromText("POINT(40 50)")));
 		assertNotEquals("POINT (40 51)", GeoFunctions.ST_AsWKT(GeoFunctions.ST_GeomFromText("POINT(40 50)")));
 	}
-
+	
+	@Test
+	public void ST_GeomFromWKB() {
+		
+		
+		assertEquals("POINT (40 50)", GeoFunctions.ST_GeomFromWKB(GeoFunctions.ST_AsWKB(GeoFunctions.ST_GeomFromText("POINT(40 50)"))).g().toString());
+		
+	}
+	 
 	
 	@Test
 	public void ST_LineFromText() {
