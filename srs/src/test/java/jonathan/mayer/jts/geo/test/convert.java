@@ -18,6 +18,30 @@ public class convert {
 		assertEquals("POINT (40 50)", GeoFunctions.ST_AsText(GeoFunctions.ST_GeomFromText("POINT(40 50)")));
 		assertNotEquals("POINT (40 51)", GeoFunctions.ST_AsText(GeoFunctions.ST_GeomFromText("POINT(40 50)")));
 	}
+	
+	
+	@Test
+	public void ST_AsGeoJSON() {
+		
+		String wkt = "POINT(40 50)";
+		int srid = 0;
+		Boolean encodecrs=false;
+		Geom g = GeoFunctions.ST_GeomFromText(wkt,srid);
+		String result = GeoFunctions.ST_AsGeoJSON(g,encodecrs);
+		String jsonresult1 = "{\"type\":\"Point\",\"coordinates\":[40,50]}";
+		assertEquals(jsonresult1,result);
+		
+		 wkt = "POINT(40 50)";
+		 srid = 4326;
+		 encodecrs=true;
+		 g = GeoFunctions.ST_GeomFromText(wkt,srid);
+		 result = GeoFunctions.ST_AsGeoJSON(g,encodecrs);
+		 jsonresult1 = "{\"type\":\"Point\",\"coordinates\":[40,50],\"crs\":{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:4326\"}}}";
+		assertEquals(jsonresult1,result);
+		
+		
+		
+	}
 	@Test
 	public void ST_AsWKB() {
 		
