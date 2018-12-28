@@ -120,6 +120,37 @@ public class properties {
 
 	}
 	
+	
+	
+	@Test
+	public void ST_NumInteriorRings() {
+		// GeoFunctions.ST_Is3D(geom)
+		String wkt = "POLYGON((1 2, 3 4, 5 6, 1 2))";
+		
+		Geom g =GeoFunctions.ST_GeomFromText(wkt);
+		assertEquals(0, GeoFunctions.ST_NumInteriorRings(g));
+		 wkt = "MULTIPOLYGON (((40 40, 20 45, 45 30, 40 40)),((20 35, 45 20, 30 5, 10 10, 10 30, 20 35),(30 20, 20 25, 20 15, 30 20)))";
+		
+		g =GeoFunctions.ST_GeomFromText(wkt);
+		assertEquals(1, GeoFunctions.ST_NumInteriorRings(g));
+		
+
+	}
+	@Test
+	public void ST_NRings() {
+		// GeoFunctions.ST_Is3D(geom)
+		String wkt = "POLYGON((1 2, 3 4, 5 6, 1 2))";
+		
+		Geom g =GeoFunctions.ST_GeomFromText(wkt);
+		assertEquals(1, GeoFunctions.ST_NRings(g));
+		 wkt = "MULTIPOLYGON (((40 40, 20 45, 45 30, 40 40)),((20 35, 45 20, 30 5, 10 10, 10 30, 20 35),(30 20, 20 25, 20 15, 30 20)))";
+		
+		g =GeoFunctions.ST_GeomFromText(wkt);
+		assertEquals(3, GeoFunctions.ST_NRings(g));
+		
+
+	}
+	
 	@Test
 	public void ST_X() {
 

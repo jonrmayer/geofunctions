@@ -131,20 +131,27 @@ public class GeoFunctions {
 		final Geometry g = GeometryEngine.geometryFromWkt(wkt, GeometryType.MULTIPOLYGON);
 		return bind(g, srid);
 	}
-	
-	
-	
+
 	public static int ST_NumGeometries(Geom geom) {
-		return GeometryEngine.numgeometries(geom);
+		return GeometryEngine.numgeometries(geom.g());
 	}
-	
+
 	public static int ST_NPoints(Geom geom) {
-		return GeometryEngine.numpoints(geom);
+		return GeometryEngine.numpoints(geom.g());
+	}
+
+	public static int ST_NumPoints(Geom geom) {
+		return GeometryEngine.numpoints(geom.g());
 	}
 	
-	public static int ST_NumPoints(Geom geom) {
-		return GeometryEngine.numpoints(geom);
+	public static int ST_NRings(Geom geom) {
+		return GeometryEngine.nrings(geom.g());
 	}
+	
+	public static int ST_NumInteriorRings(Geom geom) {
+		return GeometryEngine.nInteriorRings(geom.g());
+	}
+	
 
 	// Creation
 
@@ -160,12 +167,11 @@ public class GeoFunctions {
 
 		return GeometryEngine.makePoint(x.doubleValue(), y.doubleValue());
 	}
-	
+
 	public static Geom ST_MinimumRectangle(Geom geom) {
 
-		return GeometryEngine.minimumRectangle(geom);
+		return GeometryEngine.minimumRectangle(geom.g());
 	}
-	
 
 	public static Geom ST_Point(BigDecimal x, BigDecimal y, BigDecimal z) {
 
@@ -179,7 +185,7 @@ public class GeoFunctions {
 	}
 
 	public static Geom ST_MakeLine(Geom... geoms) {
-		
+
 		Collection<Geometry> colgeoms = new ArrayList<Geometry>();
 		for (Geom geom : geoms) {
 			colgeoms.add(geom.g());
@@ -240,7 +246,7 @@ public class GeoFunctions {
 
 	/** Returns the type of {@code geom}. */
 	public static String ST_GeometryType(Geom geom) {
-		return GeometryEngine.typename(geom);
+		return GeometryEngine.typename(geom.g());
 	}
 
 	/** Returns the OGC SFS type code of {@code geom}. */
@@ -281,7 +287,7 @@ public class GeoFunctions {
 
 	private static boolean ST_Covers(Geom geom1, Geom geom2) {
 		return GeometryEngine.covers(geom1.g(), geom2.g());
-	
+
 	}
 
 	public static boolean ST_Intersects(Geom geom1, Geom geom2) {
@@ -290,7 +296,7 @@ public class GeoFunctions {
 
 	public static boolean ST_EnvelopesIntersect(Geom geom1, Geom geom2) {
 		return GeometryEngine.envelopeintersects(geom1.g(), geom2.g());
-	
+
 	}
 
 	public static boolean ST_Disjoint(Geom geom1, Geom geom2) {
@@ -586,7 +592,6 @@ public class GeoFunctions {
 				return null;
 			}
 
-			
 			return UnaryUnionOp.union(geoms);
 
 		}
@@ -710,48 +715,91 @@ public class GeoFunctions {
 			return new SimpleGeom(g);
 		}
 
-		public static Geom minimumRectangle(Geom geom) {
+		public static Geom minimumRectangle(Geometry geom) {
 			if (geom == null) {
 				return null;
 			}
-			final Geometry g = new MinimumDiameter(geom.g()).getMinimumRectangle();
-			
+			final Geometry g = new MinimumDiameter(geom).getMinimumRectangle();
+
 			return new SimpleGeom(g);
 		}
-		
-		public static int numpoints(Geom geom) {
+
+		public static int numpoints(Geometry geom) {
 			if (geom == null) {
 				return 0;
 			}
-			
-			return geom.g().getNumPoints();
+
+			return geom.getNumPoints();
 		}
-		
-		public static int nrings(Geom geom) {
+		public static int nInteriorRings(Geometry geom) {
 			if (geom == null) {
 				return 0;
 			}
+			int total = 0;
 			
-			
-			
-//			geom.g().
-			String typename = typename(geom);
-			if(typename=="POLYGON" || typename=="MULTIPOLYGON") {
+			if (geom instanceof Polygon) {
 				
-			}else {
+				if(geom.getGeometryN(0)!=null) {
+				
+					total +=((Polygon) geom).getNumInteriorRing();
+				}
+			} else if (geom instanceof MultiPolygon) {
+
+				int num = numgeometries(geom);
+				
+				for(int i=0;i<num;i++) {
+					Geometry p = geom.getGeometryN(i);
+					if(p.getGeometryN(0)!=null) {
+						
+						total +=((Polygon) p).getNumInteriorRing();
+					}
+				}
+
+			} else {
 				return 0;
 			}
+
+			return total;
+		}
+		public static int nrings(Geometry geom) {
+			if (geom == null) {
+				return 0;
+			}
+			int total = 0;
 			
-			return geom.g().getNumPoints();
+			if (geom instanceof Polygon) {
+				
+				if(geom.getGeometryN(0)!=null) {
+					total +=1;	
+					total +=((Polygon) geom).getNumInteriorRing();
+				}
+			} else if (geom instanceof MultiPolygon) {
+
+				int num = numgeometries(geom);
+				
+				for(int i=0;i<num;i++) {
+					Geometry p = geom.getGeometryN(i);
+					if(p.getGeometryN(0)!=null) {
+						total +=1;	
+						total +=((Polygon) p).getNumInteriorRing();
+					}
+				}
+
+			} else {
+				return 0;
+			}
+
+			return total;
 		}
 
-		public static int numgeometries(Geom geom) {
+		public static int numgeometries(Geometry geom) {
 			if (geom == null) {
 				return 0;
 			}
-			
-			return geom.g().getNumGeometries();
+
+			return geom.getNumGeometries();
 		}
+
 		public static Point createPoint(double x, double y) {
 			return createPoint(x, y, Coordinate.NULL_ORDINATE);
 		}
@@ -779,9 +827,8 @@ public class GeoFunctions {
 		}
 
 		public static Geometry makeLine(Collection<Geometry> geomcoll) {
-			
-			
-			Geometry[] geoms =geomcoll.toArray(new Geometry[geomcoll.size()]);
+
+			Geometry[] geoms = geomcoll.toArray(new Geometry[geomcoll.size()]);
 			int totalpoints = 0;
 			for (Geometry geom : geomcoll) {
 				totalpoints += pointCount(geom);
@@ -834,7 +881,6 @@ public class GeoFunctions {
 			if (geom == null) {
 				return null;
 			}
-			
 
 			return geom.getFactory().createPoint(new MinimumBoundingCircle(geom).getCentre());
 		}
@@ -870,9 +916,9 @@ public class GeoFunctions {
 
 		}
 
-		public static String typename(Geom geom) {
+		public static String typename(Geometry geom) {
 
-			String gname = geom.g().getGeometryType().toUpperCase();
+			String gname = geom.getGeometryType().toUpperCase();
 
 			return GeometryType.valueOf(gname).name();
 
