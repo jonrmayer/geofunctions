@@ -1,0 +1,223 @@
+Calcite Spatial Functions Status
+
+Geometry conversion functions:
+ST_AsText(geom)
+ST_AsWKT(geom)
+ST_GeomFromText(wkt [, srid ])
+ST_LineFromText(wkt [, srid ])
+ST_MLineFromText(wkt [, srid ])
+ST_MPointFromText(wkt [, srid ])
+ST_MPolyFromText(wkt [, srid ]) 
+ST_MPolyFromText(wkt [, srid ])
+ST_PointFromText(wkt [, srid ])
+ST_PolyFromText(wkt [, srid ]) 
+
+ST_AsBinary(geom)
+ST_AsGML(geom) 
+ST_Force2D(geom)
+ST_GeomFromGML(gml [, srid ]) 
+ST_GeomFromWKB(wkb [, srid ])
+ST_GoogleMapLink(geom [, layerType [, zoom ]])
+ST_LineFromWKB(wkb [, srid ])
+ST_OSMMapLink(geom [, marker ])
+ST_PointFromWKB(wkb [, srid ])
+ST_PolyFromWKB(wkb [, srid ]) 
+ST_ToMultiLine(geom) 
+ST_ToMultiPoint(geom))
+ST_ToMultiSegments(geom)
+
+Geometry conversion functions (3D)
+ST_Force3D(geom) 
+
+Geometry creation functions (2D)
+ST_MakeLine(point1 [, point ]*)
+ST_MakePoint(x, y [, z ])
+ST_Point(x, y [, z ])
+
+ST_BoundingCircle(geom) 
+ST_Expand(geom, distance) 
+ST_Expand(geom, deltaX, deltaY) 
+ST_MakeEllipse(point, width, height) 
+ST_MakeEnvelope(xMin, yMin, xMax, yMax [, srid ])
+ST_MakeGrid(geom, deltaX, deltaY)
+ST_MakeGridPoints(geom, deltaX, deltaY) 
+ST_MakePolygon(lineString [, hole ]) 
+ST_MinimumDiameter(geom)
+ST_MinimumRectangle(geom)
+ST_OctogonalEnvelope(geom)
+ST_RingBuffer(geom, distance, bufferCount [, endCapStyle [, doDifference]])
+
+Geometry creation functions (3D)
+ST_Extrude(geom, height [, flag])
+ST_GeometryShadow(geom, point, height)
+ST_GeometryShadow(geom, azimuth, altitude, height [, unify ]) 
+
+Geometry properties (2D)
+ST_Boundary(geom [, srid ])
+ST_Distance(geom1, geom2)
+ST_GeometryType(geom)
+ST_GeometryTypeCode(geom)
+ST_Envelope(geom [, srid ])
+ST_X(geom)
+ST_Y(geom)
+
+ST_Centroid(geom)
+ST_CompactnessRatio(polygon) 
+ST_CoordDim(geom)
+ST_Dimension(geom)
+ST_EndPoint(lineString) 
+ST_Envelope(geom [, srid ]) 
+ST_Explode(query [, fieldName])
+ST_Extent(geom)
+ST_ExteriorRing(polygon) 
+ST_GeometryN(geomCollection, n)
+ST_InteriorRingN(polygon, n) 
+ST_IsClosed(geom) 
+ST_IsEmpty(geom)
+ST_IsRectangle(geom)
+ST_IsRing(geom)
+ST_IsSimple(geom)
+ST_IsValid(geom) 
+ST_IsValidDetail(geom [, selfTouchValid ]) 
+ST_IsValidReason(geom [, selfTouchValid ])
+ST_NPoints(geom) 
+ST_NumGeometries(geom)
+ST_NumInteriorRing(geom)
+ST_NumInteriorRings(geom)
+ST_NumPoints(lineString)
+ST_PointN(geom, n)
+ST_PointOnSurface(geom)
+ST_SRID(geom) 
+ST_StartPoint(lineString)
+ST_XMax(geom) 
+ST_XMin(geom) 
+ST_YMax(geom) 
+ST_YMin(geom) 
+
+Geometry properties (3D)
+ST_Is3D(s)
+ST_Z(geom)
+
+ST_ZMax(geom)
+ST_ZMin(geom)
+
+Geometry predicates
+ST_Contains(geom1, geom2)
+ST_ContainsProperly(geom1, geom2)
+ST_Crosses(geom1, geom2)
+ST_Disjoint(geom1, geom2)
+ST_DWithin(geom1, geom2, distance)
+ST_EnvelopesIntersect(geom1, geom2)
+ST_Equals(geom1, geom2)
+ST_Intersects(geom1, geom2)
+ST_Overlaps(geom1, geom2)
+ST_Touches(geom1, geom2)
+ST_Within(geom1, geom2)
+
+ST_Covers(geom1, geom2)
+ST_OrderingEquals(geom1, geom2) 
+ST_Relate(geom1, geom2)
+ST_Relate(geom1, geom2, iMatrix) 
+
+Geometry operators (2D)
+ST_Buffer(geom, distance [, quadSegs | style ])
+ST_Union(geom1, geom2)
+ST_Union(geomCollection)
+
+ST_ConvexHull(geom) 
+ST_Difference(geom1, geom2)
+ST_Intersection(geom1, geom2)
+ST_SymDifference(geom1, geom2)
+
+Affine transformation functions (3D and 2D)
+ST_Rotate(geom, angle [, origin | x, y]) 
+ST_Scale(geom, xFactor, yFactor [, zFactor ]) 
+ST_Translate(geom, x, y, [, z]) 
+
+Geometry editing functions (2D)
+ST_AddPoint(geom, point [, tolerance ])
+ST_CollectionExtract(geom, dimension)
+ST_Densify(geom, tolerance) 
+ST_FlipCoordinates(geom)
+ST_Holes(geom)
+ST_Normalize(geom) 
+ST_RemoveDuplicatedCoordinates(geom)
+ST_RemoveHoles(geom)
+ST_RemovePoints(geom, poly) 
+ST_RemoveRepeatedPoints(geom, tolerance)
+ST_Reverse(geom) 
+
+Geometry editing functions (3D)
+ST_AddZ(geom, zToAdd)
+ST_Interpolate3DLine(geom)
+ST_MultiplyZ(geom, zFactor)
+ST_Reverse3DLine(geom [, sortOrder ])
+ST_UpdateZ(geom, newZ [, updateCondition ]) 
+ST_ZUpdateLineExtremities(geom, startZ, endZ [, interpolate ]) 
+
+Geometry measurement functions (2D)
+ST_Area(geom) 
+ST_ClosestCoordinate(geom, point)
+ST_ClosestPoint(geom1, geom2) 
+ST_FurthestCoordinate(geom, point)
+ST_Length(lineString) 
+ST_LocateAlong(geom, segmentLengthFraction, offsetDistance) 
+ST_LongestLine(geom1, geom2) 
+ST_MaxDistance(geom1, geom2)
+ST_Perimeter(polygon) 
+ST_ProjectPoint(point, lineString)
+
+Geometry measurement functions (3D)
+ST_3DArea(geom) 
+ST_3DLength(geom) 
+ST_3DPerimeter(geom)
+ST_SunPosition(point [, timestamp ])
+
+Geometry processing functions (2D)
+ST_LineIntersector(geom1, geom2) 
+ST_LineMerge(geom)
+ST_MakeValid(geom [, preserveGeomDim [, preserveDuplicateCoord [, preserveCoordDim]]]) 
+ST_Polygonize(geom)
+ST_PrecisionReducer(geom, n) 
+ST_RingSideBuffer(geom, distance, bufferCount [, endCapStyle [, doDifference]])
+ST_SideBuffer(geom, distance [, bufferStyle ])
+ST_Simplify(geom, distance)
+ST_SimplifyPreserveTopology(geom)
+ST_Snap(geom1, geom2, tolerance) 
+ST_Split(geom1, geom2 [, tolerance])
+
+Geometry projection functions
+ST_SetSRID(geom, srid)
+ST_Transform(geom, srid)
+
+Trigonometry functions
+ST_Azimuth(point1, point2) 
+
+Topography functions
+ST_TriangleAspect(geom)
+ST_TriangleContouring(query [, z1, z2, z3 ][, varArgs]*)
+ST_TriangleDirection(geom) 
+ST_TriangleSlope(geom)
+ST_Voronoi(geom [, outDimension [, envelopePolygon ]]) 
+
+Triangulation functions
+ST_ConstrainedDelaunay(geom [, flag [, quality ]]) 
+ST_Delaunay(geom [, flag [, quality ]])
+ST_Tessellate(polygon) 
+
+Geometry aggregate functions
+ST_Accum(geom)
+ST_Collect(geom)
+ST_Union(geom) 
+
+
+
+
+
+
+
+
+
+
+
+
