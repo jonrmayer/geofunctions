@@ -77,17 +77,7 @@ public class create {
 
 	}
 	
-	@Test
-	public void ST_MinimumRectangle() {
-
-		
-//		GeoFunctions.ST_MinimumRectangle(geom)
-		
-		Geom g = GeoFunctions.ST_GeomFromText("LINESTRING (0 0, 1 0)");
-
-		assertEquals("LINESTRING (0 0, 1 0)", GeoFunctions.ST_MinimumRectangle(g).g().toString());
-
-	}
+	
 	
 	
 	

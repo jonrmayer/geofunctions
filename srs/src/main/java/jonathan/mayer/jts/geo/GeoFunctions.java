@@ -48,8 +48,8 @@ public class GeoFunctions {
 		return new UnsupportedOperationException();
 	}
 
-	public static double ST_Area(Geom geom1) {
-		return GeometryEngine.getarea(geom1);
+	public static Double ST_Area(Geom geom1) {
+		return GeometryEngine.getarea(geom1.g());
 	}
 
 	public static String ST_AsText(Geom g) {
@@ -86,6 +86,21 @@ public class GeoFunctions {
 		final Geometry g = GeometryEngine.geometryFromWkt(wkt, GeometryType.LINESTRING);
 		return bind(g, srid);
 	}
+	
+	
+	
+	public static Double ST_Length(Geom geom1) {
+		return GeometryEngine.length(geom1.g());
+	}
+	
+	
+	
+	public static Double ST_Perimeter(Geom geom1) {
+		return GeometryEngine.perimeter(geom1.g());
+	}
+	
+	
+	
 
 	public static Geom ST_MPointFromText(String s) {
 		return ST_GeomFromText(s, NO_SRID);
@@ -143,15 +158,14 @@ public class GeoFunctions {
 	public static int ST_NumPoints(Geom geom) {
 		return GeometryEngine.numpoints(geom.g());
 	}
-	
+
 	public static int ST_NRings(Geom geom) {
 		return GeometryEngine.nrings(geom.g());
 	}
-	
+
 	public static int ST_NumInteriorRings(Geom geom) {
 		return GeometryEngine.nInteriorRings(geom.g());
 	}
-	
 
 	// Creation
 
@@ -165,17 +179,29 @@ public class GeoFunctions {
 
 	public static Geom ST_Point(BigDecimal x, BigDecimal y) {
 
-		return GeometryEngine.makePoint(x.doubleValue(), y.doubleValue());
+		Geometry result = GeometryEngine.makePoint(x.doubleValue(), y.doubleValue());
+		
+		return new SimpleGeom(result);
 	}
 
 	public static Geom ST_MinimumRectangle(Geom geom) {
 
-		return GeometryEngine.minimumRectangle(geom.g());
+		Geometry result = GeometryEngine.minimumRectangle(geom.g());
+		
+		return new SimpleGeom(result);
+	}
+	
+	public static Geom ST_MinimumDiameter (Geom geom) {
+
+		Geometry result = GeometryEngine.minimumDiameter(geom.g());
+		
+		return new SimpleGeom(result);
 	}
 
 	public static Geom ST_Point(BigDecimal x, BigDecimal y, BigDecimal z) {
 
-		return GeometryEngine.makePoint(x.doubleValue(), y.doubleValue(), z.doubleValue());
+		Geometry result = GeometryEngine.makePoint(x.doubleValue(), y.doubleValue(), z.doubleValue());
+		return new SimpleGeom(result);
 	}
 
 	public static Geom ST_MakeEnvelope(double xmin, double ymin, double xmax, double ymax, int srid) {
@@ -198,12 +224,40 @@ public class GeoFunctions {
 
 	/** Returns whether {@code geom} has at least one z-coordinate. */
 	public static boolean ST_Is3D(Geom geom) {
-		return GeometryEngine.hasZ(geom);
+		return GeometryEngine.hasZ(geom.g());
+	}
+
+	public static boolean ST_IsValid(Geom geom) {
+		return GeometryEngine.isvalid(geom.g());
+	}
+
+	public static boolean ST_IsSimple(Geom geom) {
+		return GeometryEngine.issimple(geom.g());
 	}
 
 	/** Returns the x-value of the first coordinate of {@code geom}. */
 	public static Double ST_X(Geom geom) {
 		return geom.g() instanceof Point ? ((Point) geom.g()).getX() : null;
+	}
+
+	public static Double ST_XMax(Geom geom) {
+		Double result = GeometryEngine.getxmax(geom.g());
+		return result;
+	}
+
+	public static Double ST_XMin(Geom geom) {
+		Double result = GeometryEngine.getxmin(geom.g());
+		return result;
+	}
+
+	public static Double ST_YMax(Geom geom) {
+		Double result = GeometryEngine.getymax(geom.g());
+		return result;
+	}
+
+	public static Double ST_YMin(Geom geom) {
+		Double result = GeometryEngine.getymin(geom.g());
+		return result;
 	}
 
 	/** Returns the y-value of the first coordinate of {@code geom}. */
@@ -361,10 +415,31 @@ public class GeoFunctions {
 
 	}
 
+	public static Geom ST_StartPoint(Geom geom) {
+
+		Geometry g = GeometryEngine.startpoint(geom.g());
+		return new SimpleGeom(g);
+
+	}
+
+	public static Geom ST_EndPoint(Geom geom) {
+
+		Geometry g = GeometryEngine.endpoint(geom.g());
+		return new SimpleGeom(g);
+
+	}
+
 	public static Geom ST_Transform(Geom geom, int srid) {
 		SpatialReference sr = SpatialReference.create(srid);
 		Geometry g = GeometryEngine.transform(geom.g(), srid);
 		return bind(g, sr);
+
+	}
+
+	public static Geom ST_Transform(Geom geom, String proj) {
+		// SpatialReference sr = SpatialReference.create(srid);
+		Geometry g = GeometryEngine.transform(geom.g(), proj);
+		return new SimpleGeom(g);
 
 	}
 
@@ -535,13 +610,77 @@ public class GeoFunctions {
 
 		}
 
-		public static boolean hasZ(Geom geom) {
+		public static boolean hasZ(Geometry geom) {
+
 			boolean result = false;
-			Double z = geom.g().getCoordinates()[0].z;
+			if (geom == null) {
+				return result;
+			}
+			Double z = geom.getCoordinates()[0].z;
 			if (!z.isNaN()) {
 				result = true;
 			}
 
+			return result;
+
+		}
+
+		public static boolean isvalid(Geometry geom) {
+			boolean result = false;
+			if (geom == null) {
+				return result;
+			}
+
+			result = geom.isValid();
+			return result;
+
+		}
+
+		public static double length(Geometry geom) {
+
+			Double result = 0.0d;
+			if (geom == null) {
+				return result;
+			}
+
+			if (geom instanceof LineString || geom instanceof MultiLineString) {
+				result = geom.getLength();
+			}
+
+			return result;
+
+		}
+
+		public static double perimeter(Geometry geom) {
+
+			double result = 0.0d;
+			if (geom == null) {
+				return result;
+			}
+
+			if (geom instanceof Polygon || geom instanceof MultiPolygon) {
+				
+				for (int i = 0; i < geom.getNumGeometries(); i++) {
+					
+					Polygon p = (Polygon) geom.getGeometryN(i);
+					
+					result+=p.getExteriorRing().getLength();
+					
+				}
+				
+			}
+
+			return result;
+
+		}
+
+		public static boolean issimple(Geometry geom) {
+			boolean result = false;
+			if (geom == null) {
+				return result;
+			}
+
+			result = geom.isSimple();
 			return result;
 
 		}
@@ -576,6 +715,15 @@ public class GeoFunctions {
 			return result;
 		}
 
+		public static Geometry transform(Geometry geom, String to_proj) {
+			if (geom == null) {
+				return null;
+			}
+
+			Geometry result = GeometryTransform.transform(geom, to_proj);
+			return result;
+		}
+
 		public static Geometry setsrid(Geometry geom, int srid) {
 			if (geom == null) {
 				return null;
@@ -583,6 +731,34 @@ public class GeoFunctions {
 
 			Geometry result = geom.copy();
 			result.setSRID(srid);
+
+			return result;
+		}
+
+		public static Geometry startpoint(Geometry geom) {
+			if (geom == null) {
+				return null;
+			}
+			Geometry result = null;
+			if (geom instanceof LineString) {
+
+				LineString ls = (LineString) geom;
+				result = ls.getStartPoint();
+			}
+
+			return result;
+		}
+
+		public static Geometry endpoint(Geometry geom) {
+			if (geom == null) {
+				return null;
+			}
+			Geometry result = null;
+			if (geom instanceof LineString) {
+
+				LineString ls = (LineString) geom;
+				result = ls.getEndPoint();
+			}
 
 			return result;
 		}
@@ -651,6 +827,20 @@ public class GeoFunctions {
 			}
 			return geom1.getEnvelopeInternal().intersects(geom2.getEnvelopeInternal());
 		}
+		
+		public static Geometry exteriorring(Geometry geom) {
+			Geometry result = null;
+			
+			if (geom == null) {
+				return result;
+			}
+			if(geom instanceof Polygon) {
+				
+				Polygon p = (Polygon)geom;
+				result = p.getExteriorRing();
+			}
+			return result;
+		}
 
 		public static Boolean crosses(Geometry geom1, Geometry geom2) {
 			if (geom1 == null || geom2 == null) {
@@ -703,25 +893,33 @@ public class GeoFunctions {
 			return geom.getBoundary();
 		}
 
-		public static Geom makePoint(double x, double y) {
+		public static Geometry makePoint(double x, double y) {
 
 			final Geometry g = createPoint(x, y);
-			return new SimpleGeom(g);
+			return g;
 		}
 
-		public static Geom makePoint(double x, double y, double z) {
+		public static Geometry makePoint(double x, double y, double z) {
 
 			final Geometry g = createPoint(x, y, z);
-			return new SimpleGeom(g);
+			return g;
 		}
 
-		public static Geom minimumRectangle(Geometry geom) {
+		public static Geometry minimumRectangle(Geometry geom) {
 			if (geom == null) {
 				return null;
 			}
 			final Geometry g = new MinimumDiameter(geom).getMinimumRectangle();
 
-			return new SimpleGeom(g);
+			return g;
+		}
+		
+		public static Geometry minimumDiameter(Geometry geom) {
+			if (geom == null) {
+				return null;
+			}
+			final Geometry g = new MinimumDiameter(geom).getDiameter();
+			return g;
 		}
 
 		public static int numpoints(Geometry geom) {
@@ -731,27 +929,28 @@ public class GeoFunctions {
 
 			return geom.getNumPoints();
 		}
+
 		public static int nInteriorRings(Geometry geom) {
 			if (geom == null) {
 				return 0;
 			}
 			int total = 0;
-			
+
 			if (geom instanceof Polygon) {
-				
-				if(geom.getGeometryN(0)!=null) {
-				
-					total +=((Polygon) geom).getNumInteriorRing();
+
+				if (geom.getGeometryN(0) != null) {
+
+					total += ((Polygon) geom).getNumInteriorRing();
 				}
 			} else if (geom instanceof MultiPolygon) {
 
 				int num = numgeometries(geom);
-				
-				for(int i=0;i<num;i++) {
+
+				for (int i = 0; i < num; i++) {
 					Geometry p = geom.getGeometryN(i);
-					if(p.getGeometryN(0)!=null) {
-						
-						total +=((Polygon) p).getNumInteriorRing();
+					if (p.getGeometryN(0) != null) {
+
+						total += ((Polygon) p).getNumInteriorRing();
 					}
 				}
 
@@ -761,27 +960,28 @@ public class GeoFunctions {
 
 			return total;
 		}
+
 		public static int nrings(Geometry geom) {
 			if (geom == null) {
 				return 0;
 			}
 			int total = 0;
-			
+
 			if (geom instanceof Polygon) {
-				
-				if(geom.getGeometryN(0)!=null) {
-					total +=1;	
-					total +=((Polygon) geom).getNumInteriorRing();
+
+				if (geom.getGeometryN(0) != null) {
+					total += 1;
+					total += ((Polygon) geom).getNumInteriorRing();
 				}
 			} else if (geom instanceof MultiPolygon) {
 
 				int num = numgeometries(geom);
-				
-				for(int i=0;i<num;i++) {
+
+				for (int i = 0; i < num; i++) {
 					Geometry p = geom.getGeometryN(i);
-					if(p.getGeometryN(0)!=null) {
-						total +=1;	
-						total +=((Polygon) p).getNumInteriorRing();
+					if (p.getGeometryN(0) != null) {
+						total += 1;
+						total += ((Polygon) p).getNumInteriorRing();
 					}
 				}
 
@@ -820,11 +1020,83 @@ public class GeoFunctions {
 
 		}
 
-		public static Double getarea(Geom geom) {
+		public static Double getarea(Geometry geom) {
 
-			return geom.g().getArea();
+			if (geom == null) {
+				return null;
+			}
+
+			Double result = geom.getArea();
+			return result;
+		}
+
+		public static Double getxmax(Geometry geom) {
+			if (geom == null) {
+				return null;
+			}
+
+			Double result = geom.getEnvelopeInternal().getMaxX();
+
+			return result;
 
 		}
+
+		public static Double getxmin(Geometry geom) {
+			if (geom == null) {
+				return null;
+			}
+
+			Double result = geom.getEnvelopeInternal().getMinX();
+
+			return result;
+
+		}
+
+		public static Double getymax(Geometry geom) {
+			if (geom == null) {
+				return null;
+			}
+
+			Double result = geom.getEnvelopeInternal().getMaxY();
+
+			return result;
+
+		}
+
+		public static Double getymin(Geometry geom) {
+			if (geom == null) {
+				return null;
+			}
+
+			Double result = geom.getEnvelopeInternal().getMinY();
+
+			return result;
+
+		}
+
+		// public static Double getzmax(Geometry geom) {
+		// if (geom == null) {
+		// return null;
+		// }
+		//
+		// Double result =geom.getEnvelopeInternal().
+		//
+		//
+		// return result;
+		//
+		// }
+		//
+		// public static Double getzmin(Geometry geom) {
+		// if (geom == null) {
+		// return null;
+		// }
+		//
+		// Double result =geom.getEnvelopeInternal().getMinZ();
+		//
+		//
+		// return result;
+		//
+		// }
 
 		public static Geometry makeLine(Collection<Geometry> geomcoll) {
 
@@ -947,9 +1219,31 @@ public class GeoFunctions {
 
 		}
 
+		public static Geometry transform(Geometry geom, String to_proj) {
+
+			Geometry result = null;
+			int geomsrid = geom.getSRID();
+
+			CoordinateReferenceSystem fromcrs = crs(geomsrid);
+			CoordinateReferenceSystem tocrs = crs(to_proj);
+			CoordinateTransform trans = ctf.createTransform(fromcrs, tocrs);
+			result = transformGeometry(trans, geom);
+
+			return result;
+
+		}
+
 		protected static CoordinateReferenceSystem crs(int srid) {
 
 			CoordinateReferenceSystem result = crsFactory.createFromName(String.format("epsg:%s", srid));
+
+			return result;
+
+		}
+
+		protected static CoordinateReferenceSystem crs(String proj) {
+
+			CoordinateReferenceSystem result = crsFactory.createFromParameters(null, proj);
 
 			return result;
 

@@ -31,7 +31,12 @@ public class crs {
 //		GeoFunctions.ST_Transform(geom, srid)
 		Geom g =GeoFunctions.ST_GeomFromText("POINT(50 50)",4326);
 		assertEquals("POINT (3963652.4834313598 1425830.5980279834)",GeoFunctions.ST_Transform(g,27700).g().toString());
+	
+		// 2. Variant
 		
+		String projection27700 = "+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 "
+			    + "+x_0=400000 +y_0=-100000 +ellps=airy +datum=OSGB36 +units=m +no_defs";
+		assertEquals("POINT (3963652.4834313598 1425830.5980279834)",GeoFunctions.ST_Transform(g,projection27700).g().toString());
 	}
 	
 	

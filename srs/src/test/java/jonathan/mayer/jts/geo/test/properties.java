@@ -51,35 +51,60 @@ public class properties {
 
 	}
 
-	
+	@Test
+	public void ST_Length() {
+		// GeoFunctions.ST_Length(geom1)
+		
+		String wkt = "LINESTRING(743238 2967416,743238 2967450,743265 2967450,743265.625 2967416,743238 2967416)";
+		Geom g = GeoFunctions.ST_GeomFromText(wkt,2249);
+//		Geom gt = GeoFunctions.ST_Transform(g, 2249);
+		assertEquals("122.63074400009504",Double.toString(GeoFunctions.ST_Length(g)));
+				
+	}
+	@Test
+	public void ST_Perimeter() {
+		// GeoFunctions.ST_Perimeter(geom1)
+		String wkt = "POLYGON((743238 2967416,743238 2967450,743265 2967450,743265.625 2967416,743238 2967416))";
+		Geom g = GeoFunctions.ST_GeomFromText(wkt,2249);
+//		Geom gt = GeoFunctions.ST_Transform(g, 2249);
+		assertEquals("122.63074400009504",Double.toString(GeoFunctions.ST_Perimeter(g)));
 
+	}
+	
+	@Test
+	public void ST_MinimumDiameter() {
+		// GeoFunctions.ST_Perimeter(geom1)
+		String wkt = "POLYGON((743238 2967416,743238 2967450,743265 2967450,743265.625 2967416,743238 2967416))";
+		Geom g = GeoFunctions.ST_GeomFromText(wkt,2249);
+//		Geom gt = GeoFunctions.ST_Transform(g, 2249);
+		assertEquals("LINESTRING (743265.6156683647 2967416.5076409625, 743238 2967416)",
+				GeoFunctions.ST_MinimumDiameter(g).g().toString());
+
+	}
+	
+	@Test
+	public void ST_MinimumRectangle() {
+		// GeoFunctions.ST_Perimeter(geom1)
+		String wkt = "POLYGON((743238 2967416,743238 2967450,743265 2967450,743265.625 2967416,743238 2967416))";
+		Geom g = GeoFunctions.ST_GeomFromText(wkt,2249);
+//		Geom gt = GeoFunctions.ST_Transform(g, 2249);
+		assertEquals("POLYGON ((743264.9910239311 2967450.4960363717, 743237.3753555663 2967449.9883954134, 743238.0094760772 2967415.4922395404, 743265.6251444418 2967415.9998804983, 743264.9910239311 2967450.4960363717))",
+				GeoFunctions.ST_MinimumRectangle(g).g().toString());
+
+	}
 	
 	@Test
 	public void ST_GeometryType() {
 		// GeoFunctions.ST_GeometryType(geom)
 		 assertEquals("LINESTRING",GeoFunctions.ST_GeometryType(GeoFunctions.ST_GeomFromText("LINESTRING(1 3, 5 3)")));
-		// assertEquals(true,GeoFunctions.ST_Equals(GeoFunctions.ST_GeomFromText("LINESTRING(1
-		// 3, 5 3)"),GeoFunctions.ST_GeomFromText("LINESTRING(1 3, 5 3)")));
-		// assertEquals("POLYGON ((0 0, 0 3, 1 3, 1 0, 0
-		// 0))",GeoFunctions.ST_Envelope(GeoFunctions.ST_GeomFromText("LINESTRING(0 0, 1
-		// 3)")).g().toString());
-		// assertEquals("POLYGON ((0 0, 0 1, 1.00000011920929 1, 1.00000011920929 0, 0
-		// 0))",GeoFunctions.ST_Envelope(GeoFunctions.ST_GeomFromText("POLYGON((0 0, 0
-		// 1, 1.0000001 1, 1.0000001 0, 0 0))")).g().toString());
+		
 	}
 
 	@Test
 	public void ST_GeometryTypeCode() {
 		// GeoFunctions.ST_GeometryTypeCode(geom)
 		 assertEquals(2,GeoFunctions.ST_GeometryTypeCode(GeoFunctions.ST_GeomFromText("LINESTRING(1 3, 5 3)")));
-		// assertEquals(true,GeoFunctions.ST_Equals(GeoFunctions.ST_GeomFromText("LINESTRING(1
-		// 3, 5 3)"),GeoFunctions.ST_GeomFromText("LINESTRING(1 3, 5 3)")));
-		// assertEquals("POLYGON ((0 0, 0 3, 1 3, 1 0, 0
-		// 0))",GeoFunctions.ST_Envelope(GeoFunctions.ST_GeomFromText("LINESTRING(0 0, 1
-		// 3)")).g().toString());
-		// assertEquals("POLYGON ((0 0, 0 1, 1.00000011920929 1, 1.00000011920929 0, 0
-		// 0))",GeoFunctions.ST_Envelope(GeoFunctions.ST_GeomFromText("POLYGON((0 0, 0
-		// 1, 1.0000001 1, 1.0000001 0, 0 0))")).g().toString());
+		
 	}
 
 	
@@ -91,7 +116,24 @@ public class properties {
 		assertEquals(false, GeoFunctions.ST_Is3D(GeoFunctions.ST_GeomFromText("POINT(0 0)")));
 
 	}
+	
+	
+	@Test
+	public void ST_IsSimple() {
+		// GeoFunctions.ST_Is3D(geom)
+		//
+//		assertEquals(true, GeoFunctions.ST_IsSimple(GeoFunctions.ST_GeomFromText("POLYGON((1 2, 3 4, 5 6, 1 2))")));
+//		assertEquals(false, GeoFunctions.ST_IsSimple(GeoFunctions.ST_GeomFromText("LINESTRING(1 1,2 2,2 3.5,1 3,1 2,2 1)")));
 
+	}
+	@Test
+	public void ST_IsValid() {
+		// GeoFunctions.ST_Is3D(geom)
+		//
+		assertEquals(true, GeoFunctions.ST_IsValid(GeoFunctions.ST_GeomFromText("LINESTRING(0 0, 1 1)")));
+		assertEquals(false, GeoFunctions.ST_IsValid(GeoFunctions.ST_GeomFromText("POLYGON((0 0, 1 1, 1 2, 1 1, 0 0))")));
+
+	}
 	
 	@Test
 	public void ST_NPoints() {
@@ -151,12 +193,77 @@ public class properties {
 
 	}
 	
+	
+	@Test
+	public void ST_StartPoint() {
+
+//		GeoFunctions.ST_StartPoint(geom)
+		
+		Geom g = GeoFunctions.ST_LineFromText("LINESTRING(-72.1260 42.45, -72.123 42.1546)");
+		
+		assertEquals("POINT (-72.126 42.45)",GeoFunctions.ST_StartPoint(g).g().toString());
+		
+	}
+
+
+	@Test
+	public void ST_EndPoint() {
+
+//		GeoFunctions.ST_StartPoint(geom)
+		
+		Geom g = GeoFunctions.ST_LineFromText("LINESTRING(-72.1260 42.45, -72.123 42.1546)");
+		
+		assertEquals("POINT (-72.123 42.1546)",GeoFunctions.ST_EndPoint(g).g().toString());
+		
+	}
+	
+	
+	 
+	
+	
+	
 	@Test
 	public void ST_X() {
 
 //		GeoFunctions.ST_X(geom)
 		Geom g = GeoFunctions.ST_PointFromText("POINT(40 50)");
 		assertEquals("40.0",Double.toString(GeoFunctions.ST_X(g)));
+		
+	}
+	
+	@Test
+	public void ST_XMax() {
+
+//		GeoFunctions.ST_X(geom)
+		Geom g = GeoFunctions.ST_PointFromText("LINESTRING(1 3 4, 5 6 7)");
+		assertEquals("5.0",Double.toString(GeoFunctions.ST_XMax(g)));
+		
+	}
+	
+	@Test
+	public void ST_XMin() {
+
+//		GeoFunctions.ST_X(geom)
+		Geom g = GeoFunctions.ST_PointFromText("LINESTRING(1 3 4, 5 6 7)");
+		assertEquals("1.0",Double.toString(GeoFunctions.ST_XMin(g)));
+		
+	}
+	
+	@Test
+	public void ST_YMax() {
+
+//		GeoFunctions.ST_X(geom)
+		Geom g = GeoFunctions.ST_PointFromText("LINESTRING(1 3 4, 5 6 7)");
+		assertEquals("6.0",Double.toString(GeoFunctions.ST_YMax(g)));
+		
+	}
+	
+	@Test
+	public void ST_YMin() {
+
+//		GeoFunctions.ST_X(geom)
+		Geom g = GeoFunctions.ST_PointFromText("LINESTRING(1 3 4, 5 6 7)");
+		assertEquals("3.0",Double.toString(GeoFunctions.ST_YMin(g)));
 		
 	}
 	@Test
