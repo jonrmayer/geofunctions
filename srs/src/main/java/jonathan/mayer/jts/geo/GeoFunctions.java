@@ -28,9 +28,13 @@ import org.locationtech.jts.io.WKBReader;
 import org.locationtech.jts.io.WKBWriter;
 import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
+import org.locationtech.jts.operation.overlay.snap.GeometrySnapper;
 import org.locationtech.jts.operation.union.UnaryUnionOp;
+import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
+import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
 import org.locationtech.jts.algorithm.MinimumBoundingCircle;
 import org.locationtech.jts.algorithm.MinimumDiameter;
+import org.locationtech.jts.densify.Densifier;
 import org.locationtech.proj4j.CRSFactory;
 import org.locationtech.proj4j.CoordinateReferenceSystem;
 import org.locationtech.proj4j.CoordinateTransform;
@@ -86,21 +90,14 @@ public class GeoFunctions {
 		final Geometry g = GeometryEngine.geometryFromWkt(wkt, GeometryType.LINESTRING);
 		return bind(g, srid);
 	}
-	
-	
-	
+
 	public static Double ST_Length(Geom geom1) {
 		return GeometryEngine.length(geom1.g());
 	}
-	
-	
-	
+
 	public static Double ST_Perimeter(Geom geom1) {
 		return GeometryEngine.perimeter(geom1.g());
 	}
-	
-	
-	
 
 	public static Geom ST_MPointFromText(String s) {
 		return ST_GeomFromText(s, NO_SRID);
@@ -123,7 +120,14 @@ public class GeoFunctions {
 	public static Geom ST_PolyFromText(String s) {
 		return ST_GeomFromText(s, NO_SRID);
 	}
-
+	
+	
+	public static Geom ST_Reverse(Geom geom) {
+		
+		Geometry result = GeometryEngine.reverse(geom.g());
+		
+		return geom.wrap(result);
+	}
 	public static Geom ST_PolyFromText(String wkt, int srid) {
 		final Geometry g = GeometryEngine.geometryFromWkt(wkt, GeometryType.POLYGON);
 		return bind(g, srid);
@@ -145,6 +149,11 @@ public class GeoFunctions {
 	public static Geom ST_MPolyFromText(String wkt, int srid) {
 		final Geometry g = GeometryEngine.geometryFromWkt(wkt, GeometryType.MULTIPOLYGON);
 		return bind(g, srid);
+	}
+
+	public static Geom ST_Normalize(Geom geom) {
+		final Geometry g = GeometryEngine.normalize(geom.g());
+		return geom.wrap(g);
 	}
 
 	public static int ST_NumGeometries(Geom geom) {
@@ -180,21 +189,21 @@ public class GeoFunctions {
 	public static Geom ST_Point(BigDecimal x, BigDecimal y) {
 
 		Geometry result = GeometryEngine.makePoint(x.doubleValue(), y.doubleValue());
-		
+
 		return new SimpleGeom(result);
 	}
 
 	public static Geom ST_MinimumRectangle(Geom geom) {
 
 		Geometry result = GeometryEngine.minimumRectangle(geom.g());
-		
+
 		return new SimpleGeom(result);
 	}
-	
-	public static Geom ST_MinimumDiameter (Geom geom) {
+
+	public static Geom ST_MinimumDiameter(Geom geom) {
 
 		Geometry result = GeometryEngine.minimumDiameter(geom.g());
-		
+
 		return new SimpleGeom(result);
 	}
 
@@ -339,7 +348,7 @@ public class GeoFunctions {
 		return GeometryEngine.crosses(geom1.g(), geom2.g());
 	}
 
-	private static boolean ST_Covers(Geom geom1, Geom geom2) {
+	public static boolean ST_Covers(Geom geom1, Geom geom2) {
 		return GeometryEngine.covers(geom1.g(), geom2.g());
 
 	}
@@ -359,6 +368,12 @@ public class GeoFunctions {
 
 	public static boolean ST_Equals(Geom geom1, Geom geom2) {
 		return GeometryEngine.equals(geom1.g(), geom2.g());
+	}
+
+	public static Geom ST_ExteriorRing(Geom geom) {
+
+		Geometry result = GeometryEngine.exteriorring(geom.g());
+		return new SimpleGeom(result);
 	}
 
 	public static boolean ST_Overlaps(Geom geom1, Geom geom2) {
@@ -381,6 +396,11 @@ public class GeoFunctions {
 	/** Computes a buffer around {@code geom}. */
 	public static Geom ST_Buffer(Geom geom, Double distance) {
 		Geometry g = GeometryEngine.buffer(geom.g(), distance);
+		return geom.wrap(g);
+	}
+
+	public static Geom ST_Densify(Geom geom, Double tolerance) {
+		Geometry g = GeometryEngine.densify(geom.g(), tolerance);
 		return geom.wrap(g);
 	}
 
@@ -421,6 +441,57 @@ public class GeoFunctions {
 		return new SimpleGeom(g);
 
 	}
+	
+	public static Geom ST_Snap (Geom geom1,Geom geom2,double distance) {
+
+		Geometry g = GeometryEngine.snap(geom1.g(),geom2.g(),distance);
+		return new SimpleGeom(g);
+
+	}
+	
+	public static Geom ST_SimplifyPreserveTopology(Geom geom,double distance) {
+
+		Geometry g = GeometryEngine.simplifypreservetopology(geom.g(), distance);
+		return geom.wrap(g);
+
+	}
+	
+	public static Geom ST_Simplify(Geom geom,double distance) {
+
+		Geometry g = GeometryEngine.simplify(geom.g(), distance);
+		return geom.wrap(g);
+
+	}
+	
+	public static Geom ST_SymDifference(Geom geom1,Geom geom2) {
+
+		Geometry g = GeometryEngine.symmdifference(geom1.g(), geom1.g());
+		return new SimpleGeom(g);
+
+	}
+	
+	public static Geom ST_Intersection(Geom geom1,Geom geom2) {
+
+		Geometry g = GeometryEngine.intersection(geom1.g(), geom1.g());
+		return new SimpleGeom(g);
+
+	}
+	
+	public static Geom ST_ConvexHull(Geom geom) {
+
+		Geometry g = GeometryEngine.convexhull(geom.g());
+		return new SimpleGeom(g);
+
+	}
+	
+	public static Geom ST_Difference(Geom geom1,Geom geom2) {
+
+		Geometry g = GeometryEngine.difference(geom1.g(), geom1.g());
+		return new SimpleGeom(g);
+
+	}
+	
+	
 
 	public static Geom ST_EndPoint(Geom geom) {
 
@@ -477,6 +548,36 @@ public class GeoFunctions {
 			}
 			String wkt = wkw.write(geometry);
 			return wkt;
+		}
+		
+		public static Geometry simplify(Geometry geometry, double distance) {
+			Geometry result = null;
+			if (geometry == null) {
+				return result;
+			}
+			
+			result = DouglasPeuckerSimplifier.simplify(geometry, distance);
+			return result;
+		}
+		
+		public static Geometry simplifypreservetopology(Geometry geometry, double distance) {
+			Geometry result = null;
+			if (geometry == null) {
+				return result;
+			}
+			
+			result = TopologyPreservingSimplifier.simplify(geometry, distance);
+			return result;
+		}
+		
+		public static Geometry snap(Geometry geom1,Geometry geom2, double distance) {
+			Geometry result = null;
+			if (geom1 == null || geom2 == null) {
+				return result;
+			}
+			Geometry[] temp = GeometrySnapper.snap(geom1, geom2, distance);
+			result = temp[0];
+			return result;
 		}
 
 		public static byte[] geometryToWkb(Geometry geometry) {
@@ -659,15 +760,15 @@ public class GeoFunctions {
 			}
 
 			if (geom instanceof Polygon || geom instanceof MultiPolygon) {
-				
+
 				for (int i = 0; i < geom.getNumGeometries(); i++) {
-					
+
 					Polygon p = (Polygon) geom.getGeometryN(i);
-					
-					result+=p.getExteriorRing().getLength();
-					
+
+					result += p.getExteriorRing().getLength();
+
 				}
-				
+
 			}
 
 			return result;
@@ -827,16 +928,16 @@ public class GeoFunctions {
 			}
 			return geom1.getEnvelopeInternal().intersects(geom2.getEnvelopeInternal());
 		}
-		
+
 		public static Geometry exteriorring(Geometry geom) {
 			Geometry result = null;
-			
+
 			if (geom == null) {
 				return result;
 			}
-			if(geom instanceof Polygon) {
-				
-				Polygon p = (Polygon)geom;
+			if (geom instanceof Polygon) {
+
+				Polygon p = (Polygon) geom;
 				result = p.getExteriorRing();
 			}
 			return result;
@@ -854,6 +955,16 @@ public class GeoFunctions {
 				return null;
 			}
 			return geom1.disjoint(geom2);
+		}
+
+		public static Geometry densify(Geometry geom, double tolerance) {
+			Geometry result = null;
+
+			if (geom == null) {
+				return result;
+			}
+			result = Densifier.densify(geom, tolerance);
+			return result;
 		}
 
 		public static Boolean covers(Geometry geom1, Geometry geom2) {
@@ -876,6 +987,44 @@ public class GeoFunctions {
 				return false;
 			}
 			result = geom1.contains(geom2);
+			return result;
+		}
+		
+		public static Geometry convexhull(Geometry geom) {
+			Geometry result = null;
+			
+			if (geom == null) {
+				return result;
+			}
+			return geom.convexHull();
+		}
+		
+		public static Geometry difference(Geometry geom1,Geometry geom2) {
+			Geometry result = null;
+			
+			if (geom1 == null || geom2 == null) {
+				return result;
+			}
+			return geom1.difference(geom2);
+		}
+		
+		public static Geometry intersection(Geometry geom1,Geometry geom2) {
+			Geometry result = null;
+			
+			if (geom1 == null || geom2 == null) {
+				return result;
+			}
+			return geom1.intersection(geom2);
+		}
+		
+		public static Geometry symmdifference(Geometry geom1,Geometry geom2) {
+			Geometry result = null;
+			
+			if (geom1 == null || geom2 == null) {
+				return result;
+			}
+			
+			result = geom1.symDifference(geom2);
 			return result;
 		}
 
@@ -913,12 +1062,26 @@ public class GeoFunctions {
 
 			return g;
 		}
-		
+
 		public static Geometry minimumDiameter(Geometry geom) {
 			if (geom == null) {
 				return null;
 			}
 			final Geometry g = new MinimumDiameter(geom).getDiameter();
+			return g;
+		}
+
+		public static Geometry normalize(Geometry geom) {
+
+			Geometry result = null;
+
+			if (geom == null) {
+				return result;
+			}
+
+			Geometry g = geom.copy();
+			g.normalize();
+
 			return g;
 		}
 
@@ -928,6 +1091,41 @@ public class GeoFunctions {
 			}
 
 			return geom.getNumPoints();
+		}
+
+		public static Geometry removeholes(Geometry geom) {
+
+			Geometry result = null;
+			if (geom == null) {
+				return result;
+			}
+			if (geom instanceof Polygon || geom instanceof MultiPolygon) {
+				if (geom instanceof Polygon) {
+
+					if (geom.getGeometryN(0) != null) {
+
+					}
+
+				} else if (geom instanceof MultiPolygon) {
+
+				}
+
+			}
+
+			return result;
+		}
+
+		public static Geometry reverse(Geometry geom) {
+
+			Geometry result = null;
+			
+			
+			if (geom == null) {
+				return result;
+			}
+			result = geom.reverse();
+
+			return result;
 		}
 
 		public static int nInteriorRings(Geometry geom) {

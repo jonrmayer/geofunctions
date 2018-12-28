@@ -25,6 +25,19 @@ public class predicates {
 				GeoFunctions.ST_GeomFromText("POINT(0 0)")));
 
 	}
+	@Test
+	public void ST_Covers() {
+//		GeoFunctions.ST_Covers(geom1, geom2)
+		
+		Geom geom1 = GeoFunctions.ST_GeomFromText("POINT(1 2)");
+		Geom geom2 = GeoFunctions.ST_Buffer(geom1,Double.parseDouble("10"));
+		Boolean result = GeoFunctions.ST_Covers(geom1, geom1);
+		assertEquals(true, result);
+		result = GeoFunctions.ST_Covers(geom1, geom2);
+		assertEquals(false, result);
+		
+		
+	}
 
 	@Test
 	public void ST_ContainsProperly() {

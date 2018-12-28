@@ -39,6 +39,19 @@ public class properties {
 	public void ST_CoordDim() {
 		
 	}
+	
+	
+	
+	@Test
+	public void ST_ExteriorRing() {
+		// GeoFunctions.ST_Perimeter(geom1)
+		String wkt = "POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))";
+		Geom g = GeoFunctions.ST_GeomFromText(wkt);
+//		Geom gt = GeoFunctions.ST_Transform(g, 2249);
+		assertEquals("LINEARRING (0 0, 1 1, 1 2, 1 1, 0 0)",
+				GeoFunctions.ST_ExteriorRing(g).g().toString());
+
+	}
 
 	@Test
 	public void ST_Distance() {
