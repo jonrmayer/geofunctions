@@ -28,6 +28,8 @@ import org.locationtech.jts.io.WKBReader;
 import org.locationtech.jts.io.WKBWriter;
 import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
+import org.locationtech.jts.io.geojson.GeoJsonWriter;
+import org.locationtech.jts.io.geojson.GeoJsonReader;
 import org.locationtech.jts.operation.overlay.snap.GeometrySnapper;
 import org.locationtech.jts.operation.union.UnaryUnionOp;
 import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
@@ -63,7 +65,11 @@ public class GeoFunctions {
 	public static String ST_AsWKT(Geom g) {
 		return GeometryEngine.geometryToWkt(g.g());
 	}
-
+	public static String ST_AsGeoJSON(Geom g, boolean EncodeCRS) {
+		
+		String result =  GeometryEngine.geometryToGeoJSON(g.g(),EncodeCRS);;
+		return result;
+	}
 	public static byte[] ST_AsWKB(Geom g) {
 		return GeometryEngine.geometryToWkb(g.g());
 	}
@@ -532,6 +538,11 @@ public class GeoFunctions {
 
 		private static final WKTReader wkr = new WKTReader();
 		private static final WKTWriter wkw = new WKTWriter();
+		
+		private static final GeoJsonReader gsr = new GeoJsonReader();
+		private static final GeoJsonWriter gsw = new GeoJsonWriter();
+		
+		
 
 		private static final WKBReader wkbr = new WKBReader();
 		private static final WKBWriter wkbw = new WKBWriter();
@@ -548,6 +559,16 @@ public class GeoFunctions {
 			}
 			String wkt = wkw.write(geometry);
 			return wkt;
+		}
+		
+		public static String geometryToGeoJSON(Geometry geom,boolean encodeCRS) {
+			
+			if (geom == null) {
+				return null;
+			}
+			gsw.setEncodeCRS(encodeCRS);
+			String geojson = gsw.write(geom);
+			return geojson;
 		}
 		
 		public static Geometry simplify(Geometry geometry, double distance) {
