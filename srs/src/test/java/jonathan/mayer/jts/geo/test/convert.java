@@ -19,6 +19,55 @@ public class convert {
 		assertNotEquals("POINT (40 51)", GeoFunctions.ST_AsText(GeoFunctions.ST_GeomFromText("POINT(40 50)")));
 	}
 	
+//	@Test
+//	public void ST_AsGML() {
+//		
+//		String wkt = "POLYGON((0 0,0 1,1 1,1 0,0 0))";
+//		int srid = 0;
+//		Boolean encodecrs=false;
+//		Geom g = GeoFunctions.ST_GeomFromText(wkt,srid);
+//		String result = GeoFunctions.ST_AsGML(g);
+//		String gmlresult = "<gml:Polygon>\r\n" + 
+//				"  <gml:outerBoundaryIs>\r\n" + 
+//				"    <gml:LinearRing>\r\n" + 
+//				"      <gml:coordinates>\r\n" + 
+//				"        0.0,0.0 0.0,1.0 1.0,1.0 1.0,0.0 0.0,0.0 \r\n" + 
+//				"      </gml:coordinates>\r\n" + 
+//				"    </gml:LinearRing>\r\n" + 
+//				"  </gml:outerBoundaryIs>\r\n" + 
+//				"</gml:Polygon>\r\n" + 
+//				"";
+//		assertEquals(gmlresult.toString(),result);
+//		
+//		
+//		
+//		
+//	}
+	
+//	@Test
+//	public void ST_AsKML() {
+//		
+//		String wkt = "POLYGON((0 0,0 1,1 1,1 0,0 0))";
+//		int srid = 0;
+//		Boolean encodecrs=false;
+//		Geom g = GeoFunctions.ST_GeomFromText(wkt,srid);
+//		String result = GeoFunctions.ST_AsKML(g);
+//		String kmlresult = "<Polygon>\r\n" + 
+//				"  <outerBoundaryIs>\r\n" + 
+//				"  <LinearRing>\r\n" + 
+//				"    <coordinates>0.0,0.0 0.0,1.0 1.0,1.0 1.0,0.0 0.0,0.0</coordinates>\r\n" + 
+//				"  </LinearRing>\r\n" + 
+//				"  </outerBoundaryIs>\r\n" + 
+//				"</Polygon>\r\n" + 
+//				"";
+//		assertEquals(kmlresult.toString(),result.toString());
+//		
+//		
+//		
+//		
+//	}
+	
+	
 	
 	@Test
 	public void ST_AsGeoJSON() {
@@ -54,6 +103,14 @@ public class convert {
 	public void ST_AsWKT() {
 		assertEquals("POINT (40 50)", GeoFunctions.ST_AsWKT(GeoFunctions.ST_GeomFromText("POINT(40 50)")));
 		assertNotEquals("POINT (40 51)", GeoFunctions.ST_AsWKT(GeoFunctions.ST_GeomFromText("POINT(40 50)")));
+	}
+	
+	@Test
+	public void ST_GeomFromGeoJSON() {
+		String json = "{\"type\":\"Point\",\"coordinates\":[40,50]}";
+		Geom geom = GeoFunctions.ST_GeomFromGeoJSON(json);
+		assertEquals("POINT (40 50)", geom.g().toString());
+		
 	}
 	
 	@Test

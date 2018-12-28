@@ -29,6 +29,10 @@ import org.locationtech.jts.io.WKBWriter;
 import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
+import org.locationtech.jts.io.gml2.GMLReader;
+import org.locationtech.jts.io.gml2.GMLWriter;
+import org.locationtech.jts.io.kml.KMLWriter;
+
 import org.locationtech.jts.io.geojson.GeoJsonReader;
 import org.locationtech.jts.operation.overlay.snap.GeometrySnapper;
 import org.locationtech.jts.operation.union.UnaryUnionOp;
@@ -65,11 +69,28 @@ public class GeoFunctions {
 	public static String ST_AsWKT(Geom g) {
 		return GeometryEngine.geometryToWkt(g.g());
 	}
+
 	public static String ST_AsGeoJSON(Geom g, boolean EncodeCRS) {
+
+		String result = GeometryEngine.geometryToGeoJSON(g.g(), EncodeCRS);
 		
-		String result =  GeometryEngine.geometryToGeoJSON(g.g(),EncodeCRS);;
 		return result;
 	}
+	
+	public static String ST_AsKML(Geom geom) {
+
+		String result = GeometryEngine.geometryToKML(geom.g());
+		
+		return result;
+	}
+	
+	public static String ST_AsGML(Geom geom) {
+
+		String result = GeometryEngine.geometryToGML(geom.g());
+		
+		return result;
+	}
+
 	public static byte[] ST_AsWKB(Geom g) {
 		return GeometryEngine.geometryToWkb(g.g());
 	}
@@ -81,6 +102,11 @@ public class GeoFunctions {
 
 	public static Geom ST_GeomFromText(String s) {
 		return ST_GeomFromText(s, NO_SRID);
+	}
+
+	public static Geom ST_GeomFromGeoJSON(String s) {
+		Geometry result = GeometryEngine.geometryFromGeojson(s);
+		return new SimpleGeom(result);
 	}
 
 	public static Geom ST_GeomFromText(String s, int srid) {
@@ -126,14 +152,14 @@ public class GeoFunctions {
 	public static Geom ST_PolyFromText(String s) {
 		return ST_GeomFromText(s, NO_SRID);
 	}
-	
-	
+
 	public static Geom ST_Reverse(Geom geom) {
-		
+
 		Geometry result = GeometryEngine.reverse(geom.g());
-		
+
 		return geom.wrap(result);
 	}
+
 	public static Geom ST_PolyFromText(String wkt, int srid) {
 		final Geometry g = GeometryEngine.geometryFromWkt(wkt, GeometryType.POLYGON);
 		return bind(g, srid);
@@ -447,57 +473,55 @@ public class GeoFunctions {
 		return new SimpleGeom(g);
 
 	}
-	
-	public static Geom ST_Snap (Geom geom1,Geom geom2,double distance) {
 
-		Geometry g = GeometryEngine.snap(geom1.g(),geom2.g(),distance);
+	public static Geom ST_Snap(Geom geom1, Geom geom2, double distance) {
+
+		Geometry g = GeometryEngine.snap(geom1.g(), geom2.g(), distance);
 		return new SimpleGeom(g);
 
 	}
-	
-	public static Geom ST_SimplifyPreserveTopology(Geom geom,double distance) {
+
+	public static Geom ST_SimplifyPreserveTopology(Geom geom, double distance) {
 
 		Geometry g = GeometryEngine.simplifypreservetopology(geom.g(), distance);
 		return geom.wrap(g);
 
 	}
-	
-	public static Geom ST_Simplify(Geom geom,double distance) {
+
+	public static Geom ST_Simplify(Geom geom, double distance) {
 
 		Geometry g = GeometryEngine.simplify(geom.g(), distance);
 		return geom.wrap(g);
 
 	}
-	
-	public static Geom ST_SymDifference(Geom geom1,Geom geom2) {
+
+	public static Geom ST_SymDifference(Geom geom1, Geom geom2) {
 
 		Geometry g = GeometryEngine.symmdifference(geom1.g(), geom1.g());
 		return new SimpleGeom(g);
 
 	}
-	
-	public static Geom ST_Intersection(Geom geom1,Geom geom2) {
+
+	public static Geom ST_Intersection(Geom geom1, Geom geom2) {
 
 		Geometry g = GeometryEngine.intersection(geom1.g(), geom1.g());
 		return new SimpleGeom(g);
 
 	}
-	
+
 	public static Geom ST_ConvexHull(Geom geom) {
 
 		Geometry g = GeometryEngine.convexhull(geom.g());
 		return new SimpleGeom(g);
 
 	}
-	
-	public static Geom ST_Difference(Geom geom1,Geom geom2) {
+
+	public static Geom ST_Difference(Geom geom1, Geom geom2) {
 
 		Geometry g = GeometryEngine.difference(geom1.g(), geom1.g());
 		return new SimpleGeom(g);
 
 	}
-	
-	
 
 	public static Geom ST_EndPoint(Geom geom) {
 
@@ -538,11 +562,15 @@ public class GeoFunctions {
 
 		private static final WKTReader wkr = new WKTReader();
 		private static final WKTWriter wkw = new WKTWriter();
-		
+
 		private static final GeoJsonReader gsr = new GeoJsonReader();
 		private static final GeoJsonWriter gsw = new GeoJsonWriter();
 		
+		private static final GMLReader gmlr = new GMLReader();
+		private static final GMLWriter gmlw = new GMLWriter();
 		
+		// private static final KMLReader kmlr = new KMLReader();
+		private static final KMLWriter kmlw = new KMLWriter();
 
 		private static final WKBReader wkbr = new WKBReader();
 		private static final WKBWriter wkbw = new WKBWriter();
@@ -560,9 +588,29 @@ public class GeoFunctions {
 			String wkt = wkw.write(geometry);
 			return wkt;
 		}
-		
-		public static String geometryToGeoJSON(Geometry geom,boolean encodeCRS) {
+
+		public static String geometryToKML(Geometry geom) {
+
+			if (geom == null) {
+				return null;
+			}
 			
+			String kml = kmlw.write(geom);
+			return kml;
+		}
+		
+		public static String geometryToGML(Geometry geom) {
+
+			if (geom == null) {
+				return null;
+			}
+			
+			String gml = gmlw.write(geom);
+			return gml;
+		}
+
+		public static String geometryToGeoJSON(Geometry geom, boolean encodeCRS) {
+
 			if (geom == null) {
 				return null;
 			}
@@ -570,28 +618,28 @@ public class GeoFunctions {
 			String geojson = gsw.write(geom);
 			return geojson;
 		}
-		
+
 		public static Geometry simplify(Geometry geometry, double distance) {
 			Geometry result = null;
 			if (geometry == null) {
 				return result;
 			}
-			
+
 			result = DouglasPeuckerSimplifier.simplify(geometry, distance);
 			return result;
 		}
-		
+
 		public static Geometry simplifypreservetopology(Geometry geometry, double distance) {
 			Geometry result = null;
 			if (geometry == null) {
 				return result;
 			}
-			
+
 			result = TopologyPreservingSimplifier.simplify(geometry, distance);
 			return result;
 		}
-		
-		public static Geometry snap(Geometry geom1,Geometry geom2, double distance) {
+
+		public static Geometry snap(Geometry geom1, Geometry geom2, double distance) {
 			Geometry result = null;
 			if (geom1 == null || geom2 == null) {
 				return result;
@@ -665,6 +713,17 @@ public class GeoFunctions {
 			}
 			return geom;
 
+		}
+
+		public static Geometry geometryFromGeojson(String geojson) {
+			Geometry result = null;
+			try {
+				result = gsr.read(geojson);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return result;
 		}
 
 		public static Geometry geometryFromWkt(String wkt, GeometryType geometrytype) {
@@ -1010,41 +1069,41 @@ public class GeoFunctions {
 			result = geom1.contains(geom2);
 			return result;
 		}
-		
+
 		public static Geometry convexhull(Geometry geom) {
 			Geometry result = null;
-			
+
 			if (geom == null) {
 				return result;
 			}
 			return geom.convexHull();
 		}
-		
-		public static Geometry difference(Geometry geom1,Geometry geom2) {
+
+		public static Geometry difference(Geometry geom1, Geometry geom2) {
 			Geometry result = null;
-			
+
 			if (geom1 == null || geom2 == null) {
 				return result;
 			}
 			return geom1.difference(geom2);
 		}
-		
-		public static Geometry intersection(Geometry geom1,Geometry geom2) {
+
+		public static Geometry intersection(Geometry geom1, Geometry geom2) {
 			Geometry result = null;
-			
+
 			if (geom1 == null || geom2 == null) {
 				return result;
 			}
 			return geom1.intersection(geom2);
 		}
-		
-		public static Geometry symmdifference(Geometry geom1,Geometry geom2) {
+
+		public static Geometry symmdifference(Geometry geom1, Geometry geom2) {
 			Geometry result = null;
-			
+
 			if (geom1 == null || geom2 == null) {
 				return result;
 			}
-			
+
 			result = geom1.symDifference(geom2);
 			return result;
 		}
@@ -1139,8 +1198,7 @@ public class GeoFunctions {
 		public static Geometry reverse(Geometry geom) {
 
 			Geometry result = null;
-			
-			
+
 			if (geom == null) {
 				return result;
 			}
