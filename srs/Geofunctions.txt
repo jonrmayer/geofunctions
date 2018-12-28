@@ -1,22 +1,21 @@
 Calcite Spatial Functions Status
 
 Geometry conversion functions:
-ST_AsText(geom)
-ST_AsWKT(geom)
-ST_GeomFromText(wkt [, srid ])
-ST_LineFromText(wkt [, srid ])
-ST_MLineFromText(wkt [, srid ])
-ST_MPointFromText(wkt [, srid ])
-ST_MPolyFromText(wkt [, srid ]) 
-ST_MPolyFromText(wkt [, srid ])
-ST_PointFromText(wkt [, srid ])
-ST_PolyFromText(wkt [, srid ]) 
+ST_AsText(geom) - Implemented/Tested/Success
+ST_AsWKT(geom) - Implemented/Tested/Success
+ST_GeomFromText(wkt [, srid ]) - Implemented/Tested/Success
+ST_LineFromText(wkt [, srid ]) - Implemented/Tested/Success
+ST_MLineFromText(wkt [, srid ]) - Implemented/Tested/Success
+ST_MPointFromText(wkt [, srid ]) - Implemented/Tested/Success
+ST_MPolyFromText(wkt [, srid ])  - Implemented/Tested/Success
+ST_PointFromText(wkt [, srid ]) - Implemented/Tested/Success
+ST_PolyFromText(wkt [, srid ]) - Implemented/Tested/Success 
 
 ST_AsBinary(geom)
 ST_AsGML(geom) 
 ST_Force2D(geom)
 ST_GeomFromGML(gml [, srid ]) 
-ST_GeomFromWKB(wkb [, srid ])
+ST_GeomFromWKB(wkb [, srid ]) - Implemented/Tested/Success
 ST_GoogleMapLink(geom [, layerType [, zoom ]])
 ST_LineFromWKB(wkb [, srid ])
 ST_OSMMapLink(geom [, marker ])
@@ -30,11 +29,11 @@ Geometry conversion functions (3D)
 ST_Force3D(geom) 
 
 Geometry creation functions (2D)
-ST_MakeLine(point1 [, point ]*)
-ST_MakePoint(x, y [, z ])
-ST_Point(x, y [, z ])
+ST_MakeLine(point1 [, point ]*) - Implemented/Tested/Success
+ST_MakePoint(x, y [, z ]) - Implemented/Tested/Success
+ST_Point(x, y [, z ]) - Implemented/Tested/Success
 
-ST_BoundingCircle(geom) 
+ST_BoundingCircle(geom)  - Implemented/Tested/Success
 ST_Expand(geom, distance) 
 ST_Expand(geom, deltaX, deltaY) 
 ST_MakeEllipse(point, width, height) 
@@ -42,8 +41,8 @@ ST_MakeEnvelope(xMin, yMin, xMax, yMax [, srid ])
 ST_MakeGrid(geom, deltaX, deltaY)
 ST_MakeGridPoints(geom, deltaX, deltaY) 
 ST_MakePolygon(lineString [, hole ]) 
-ST_MinimumDiameter(geom)
-ST_MinimumRectangle(geom)
+ST_MinimumDiameter(geom) - Implemented/Tested/Success
+ST_MinimumRectangle(geom) - Implemented/Tested/Success
 ST_OctogonalEnvelope(geom)
 ST_RingBuffer(geom, distance, bufferCount [, endCapStyle [, doDifference]])
 
@@ -53,80 +52,80 @@ ST_GeometryShadow(geom, point, height)
 ST_GeometryShadow(geom, azimuth, altitude, height [, unify ]) 
 
 Geometry properties (2D)
-ST_Boundary(geom [, srid ])
-ST_Distance(geom1, geom2)
-ST_GeometryType(geom)
-ST_GeometryTypeCode(geom)
+ST_Boundary(geom [, srid ]) - Implemented/Tested/Success
+ST_Distance(geom1, geom2) - Implemented/Tested/Success
+ST_GeometryType(geom) - Implemented/Tested/Success
+ST_GeometryTypeCode(geom) - Implemented/Tested/Success
 ST_Envelope(geom [, srid ])
-ST_X(geom)
-ST_Y(geom)
+ST_X(geom) - Implemented/Tested/Success
+ST_Y(geom) - Implemented/Tested/Success
 
-ST_Centroid(geom)
+ST_Centroid(geom) - Implemented/Tested/Success
 ST_CompactnessRatio(polygon) 
-ST_CoordDim(geom)
+ST_CoordDim(geom) - Implemented/Tested/Success
 ST_Dimension(geom)
-ST_EndPoint(lineString) 
+ST_EndPoint(lineString)  - Implemented/Tested/Success
 ST_Envelope(geom [, srid ]) 
 ST_Explode(query [, fieldName])
-ST_Extent(geom)
-ST_ExteriorRing(polygon) 
+ST_Extent(geom) - Implemented/Tested/Success
+ST_ExteriorRing(polygon)  - Implemented/Tested/Success
 ST_GeometryN(geomCollection, n)
 ST_InteriorRingN(polygon, n) 
 ST_IsClosed(geom) 
 ST_IsEmpty(geom)
 ST_IsRectangle(geom)
 ST_IsRing(geom)
-ST_IsSimple(geom)
-ST_IsValid(geom) 
+ST_IsSimple(geom) - Implemented/Tested/Success
+ST_IsValid(geom)  - Implemented/Tested/Success
 ST_IsValidDetail(geom [, selfTouchValid ]) 
 ST_IsValidReason(geom [, selfTouchValid ])
-ST_NPoints(geom) 
-ST_NumGeometries(geom)
+ST_NPoints(geom)  - Implemented/Tested/Success
+ST_NumGeometries(geom) - Implemented/Tested/Success
 ST_NumInteriorRing(geom)
-ST_NumInteriorRings(geom)
-ST_NumPoints(lineString)
+ST_NumInteriorRings(geom) - Implemented/Tested/Success
+ST_NumPoints(lineString) - Implemented/Tested/Success
 ST_PointN(geom, n)
 ST_PointOnSurface(geom)
 ST_SRID(geom) 
-ST_StartPoint(lineString)
-ST_XMax(geom) 
-ST_XMin(geom) 
-ST_YMax(geom) 
-ST_YMin(geom) 
+ST_StartPoint(lineString) - Implemented/Tested/Success
+ST_XMax(geom)  - Implemented/Tested/Success
+ST_XMin(geom)  - Implemented/Tested/Success
+ST_YMax(geom)  - Implemented/Tested/Success
+ST_YMin(geom)  - Implemented/Tested/Success
 
 Geometry properties (3D)
-ST_Is3D(s)
-ST_Z(geom)
+ST_Is3D(s) - Implemented/Tested/Success
+ST_Z(geom) - Implemented/Tested/Success
 
 ST_ZMax(geom)
 ST_ZMin(geom)
 
 Geometry predicates
-ST_Contains(geom1, geom2)
+ST_Contains(geom1, geom2) - Implemented/Tested/Success
 ST_ContainsProperly(geom1, geom2)
-ST_Crosses(geom1, geom2)
-ST_Disjoint(geom1, geom2)
+ST_Crosses(geom1, geom2) - Implemented/Tested/Success
+ST_Disjoint(geom1, geom2) - Implemented/Tested/Success
 ST_DWithin(geom1, geom2, distance)
-ST_EnvelopesIntersect(geom1, geom2)
-ST_Equals(geom1, geom2)
-ST_Intersects(geom1, geom2)
-ST_Overlaps(geom1, geom2)
-ST_Touches(geom1, geom2)
-ST_Within(geom1, geom2)
+ST_EnvelopesIntersect(geom1, geom2) - Implemented/Tested/Success
+ST_Equals(geom1, geom2) - Implemented/Tested/Success
+ST_Intersects(geom1, geom2) - Implemented/Tested/Success
+ST_Overlaps(geom1, geom2) - Implemented/Tested/Success
+ST_Touches(geom1, geom2) - Implemented/Tested/Success
+ST_Within(geom1, geom2) - Implemented/Tested/Success
 
-ST_Covers(geom1, geom2)
+ST_Covers(geom1, geom2) - Implemented/Tested/Success
 ST_OrderingEquals(geom1, geom2) 
 ST_Relate(geom1, geom2)
 ST_Relate(geom1, geom2, iMatrix) 
 
 Geometry operators (2D)
 ST_Buffer(geom, distance [, quadSegs | style ])
-ST_Union(geom1, geom2)
+ST_Union(geom1, geom2) - Implemented/Tested/Success
 ST_Union(geomCollection)
 
-ST_ConvexHull(geom) 
+ST_ConvexHull(geom)  - Implemented/Tested/Success
 ST_Difference(geom1, geom2)
-ST_Intersection(geom1, geom2)
+ST_Intersection(geom1, geom2) - Implemented/Tested/Success
 ST_SymDifference(geom1, geom2)
 
 Affine transformation functions (3D and 2D)
@@ -137,15 +136,15 @@ ST_Translate(geom, x, y, [, z])
 Geometry editing functions (2D)
 ST_AddPoint(geom, point [, tolerance ])
 ST_CollectionExtract(geom, dimension)
-ST_Densify(geom, tolerance) 
+ST_Densify(geom, tolerance)  - Implemented/Tested/Success
 ST_FlipCoordinates(geom)
 ST_Holes(geom)
-ST_Normalize(geom) 
+ST_Normalize(geom)  - Implemented/Tested/Success
 ST_RemoveDuplicatedCoordinates(geom)
 ST_RemoveHoles(geom)
 ST_RemovePoints(geom, poly) 
 ST_RemoveRepeatedPoints(geom, tolerance)
-ST_Reverse(geom) 
+ST_Reverse(geom)  - Implemented/Tested/Success
 
 Geometry editing functions (3D)
 ST_AddZ(geom, zToAdd)
@@ -156,15 +155,15 @@ ST_UpdateZ(geom, newZ [, updateCondition ])
 ST_ZUpdateLineExtremities(geom, startZ, endZ [, interpolate ]) 
 
 Geometry measurement functions (2D)
-ST_Area(geom) 
+ST_Area(geom)  - Implemented/Tested/Success
 ST_ClosestCoordinate(geom, point)
 ST_ClosestPoint(geom1, geom2) 
 ST_FurthestCoordinate(geom, point)
-ST_Length(lineString) 
+ST_Length(lineString)  - Implemented/Tested/Success
 ST_LocateAlong(geom, segmentLengthFraction, offsetDistance) 
 ST_LongestLine(geom1, geom2) 
 ST_MaxDistance(geom1, geom2)
-ST_Perimeter(polygon) 
+ST_Perimeter(polygon)  - Implemented/Tested/Success
 ST_ProjectPoint(point, lineString)
 
 Geometry measurement functions (3D)
@@ -181,14 +180,14 @@ ST_Polygonize(geom)
 ST_PrecisionReducer(geom, n) 
 ST_RingSideBuffer(geom, distance, bufferCount [, endCapStyle [, doDifference]])
 ST_SideBuffer(geom, distance [, bufferStyle ])
-ST_Simplify(geom, distance)
-ST_SimplifyPreserveTopology(geom)
-ST_Snap(geom1, geom2, tolerance) 
+ST_Simplify(geom, distance) - Implemented/Tested/Success
+ST_SimplifyPreserveTopology(geom) - Implemented/Tested/Success
+ST_Snap(geom1, geom2, tolerance)  - Implemented/Tested/Success
 ST_Split(geom1, geom2 [, tolerance])
 
 Geometry projection functions
-ST_SetSRID(geom, srid)
-ST_Transform(geom, srid)
+ST_SetSRID(geom, srid) - Implemented/Tested/Success
+ST_Transform(geom, srid) - Implemented/Tested/Success
 
 Trigonometry functions
 ST_Azimuth(point1, point2) 
@@ -208,16 +207,4 @@ ST_Tessellate(polygon)
 Geometry aggregate functions
 ST_Accum(geom)
 ST_Collect(geom)
-ST_Union(geom) 
-
-
-
-
-
-
-
-
-
-
-
-
+ST_Union(geom)  - Implemented/Tested/Success
