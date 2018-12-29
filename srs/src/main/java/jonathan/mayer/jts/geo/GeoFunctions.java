@@ -61,6 +61,17 @@ public class GeoFunctions {
 	public static Double ST_Area(Geom geom1) {
 		return GeometryEngine.getarea(geom1.g());
 	}
+	
+	
+	
+	
+	public static String ST_GoogleMapLink(Geom geom,String layerType,int zoom) {
+		return GeometryEngine.googlemaplink(geom.g(), layerType, zoom);
+	}
+	public static String ST_OSMMapLink(Geom geom,boolean marker) {
+		return GeometryEngine.osmmaplink(geom.g(), marker);
+	}
+
 
 	public static String ST_AsText(Geom g) {
 		return ST_AsWKT(g);
@@ -73,21 +84,21 @@ public class GeoFunctions {
 	public static String ST_AsGeoJSON(Geom g, boolean EncodeCRS) {
 
 		String result = GeometryEngine.geometryToGeoJSON(g.g(), EncodeCRS);
-		
+
 		return result;
 	}
-	
+
 	public static String ST_AsKML(Geom geom) {
 
 		String result = GeometryEngine.geometryToKML(geom.g());
-		
+
 		return result;
 	}
-	
+
 	public static String ST_AsGML(Geom geom) {
 
 		String result = GeometryEngine.geometryToGML(geom.g());
-		
+
 		return result;
 	}
 
@@ -565,10 +576,10 @@ public class GeoFunctions {
 
 		private static final GeoJsonReader gsr = new GeoJsonReader();
 		private static final GeoJsonWriter gsw = new GeoJsonWriter();
-		
+
 		private static final GMLReader gmlr = new GMLReader();
 		private static final GMLWriter gmlw = new GMLWriter();
-		
+
 		// private static final KMLReader kmlr = new KMLReader();
 		private static final KMLWriter kmlw = new KMLWriter();
 
@@ -594,17 +605,17 @@ public class GeoFunctions {
 			if (geom == null) {
 				return null;
 			}
-			
+
 			String kml = kmlw.write(geom);
 			return kml;
 		}
-		
+
 		public static String geometryToGML(Geometry geom) {
 
 			if (geom == null) {
 				return null;
 			}
-			
+
 			String gml = gmlw.write(geom);
 			return gml;
 		}
@@ -1346,6 +1357,76 @@ public class GeoFunctions {
 			}
 
 			Double result = geom.getEnvelopeInternal().getMinY();
+
+			return result;
+
+		}
+
+		public static String googlemaplink(Geometry geom, String layer, int zoomlevel) {
+			String result = null;
+
+			if (geom == null) {
+				return null;
+			}
+			if (layer == null) {
+				layer = "m";
+			} else if (!layer.equals("m") && !layer.equals("k") && !layer.equals("h") && !layer.equals("p")) {
+				return null;
+			}
+			if (String.valueOf(zoomlevel) == null) {
+				zoomlevel = 19;
+			} else if (zoomlevel > 19 || zoomlevel < 1) {
+				return null;
+			}
+			Geometry g = null;
+			if (geom.getSRID() != 4326) {
+				g = transform(geom, 4326);
+			} else {
+				g = geom;
+			}
+
+			Coordinate c = g.getEnvelopeInternal().centre();
+			StringBuilder sb = new StringBuilder("https://maps.google.com/maps?ll=");
+			sb.append(c.y);
+			sb.append(",");
+			sb.append(c.x);
+			sb.append("&z=");
+			sb.append(zoomlevel);
+			sb.append("&t=");
+			sb.append(layer);
+			result = sb.toString();
+
+			return result;
+
+		}
+		public static String osmmaplink(Geometry geom, boolean marker) {
+			String result = null;
+
+			if (geom == null) {
+				return null;
+			}
+			
+			Geometry g = null;
+			if (geom.getSRID() != 4326) {
+				g = transform(geom, 4326);
+			} else {
+				g = geom;
+			}
+
+			Envelope env = g.getEnvelopeInternal();
+			
+			
+			StringBuilder sb = new StringBuilder("http://www.openstreetmap.org/?");
+	        sb.append("minlon=").append(env.getMinX());
+	        sb.append("&minlat=").append(env.getMinY());
+	        sb.append("&maxlon=").append(env.getMaxX());
+	        sb.append("&maxlat=").append(env.getMaxY());
+	        if (marker) {
+	        	Coordinate c = env.centre();
+	            sb.append("&mlat=").append(c.y);
+	            sb.append("&mlon=").append(c.x);
+	        }
+			result = sb.toString();
 
 			return result;
 
