@@ -97,7 +97,7 @@ ST_Force3D,2D Geometry ? 3D Geometry,Geometry Editors,ST_Force3D , Force the geo
 ,,Geometry Editors,ST_ForcePolygonCW , Orients all exterior rings clockwise and all interior rings counter-clockwise.,
 ,,Geometry Editors,ST_ForceRHR , Force the orientation of the vertices in a polygon to follow the Right-Hand-Rule.,
 ,,Geometry Editors,ST_ForceSFS , Force the geometries to use SFS 1.1 geometry types only.,
-,,Spatial Relationships and Measurements,ST_FrechetDistance , Returns the Fréchet distance between two geometries. This is a measure of similarity between curves that takes into account the location and ordering of the points along the curves. Units are in the units of the spatial reference system of the geometries.,
+,,Spatial Relationships and Measurements,ST_FrechetDistance , Returns the Frï¿½chet distance between two geometries. This is a measure of similarity between curves that takes into account the location and ordering of the points along the curves. Units are in the units of the spatial reference system of the geometries.,
 ,,Geometry Processing,ST_GeneratePoints , Converts a polygon or multi,
 ,,Geometry Constructors,ST_GeogFromText , Return a specified geography value from Well-Known Text representation or extended (WKT).,
 ,,Geometry Constructors,ST_GeogFromWKB , Creates a geography instance from a Well-Known Binary geometry representation (WKB) or extended Well Known Binary (EWKB).,
