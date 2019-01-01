@@ -35,7 +35,51 @@ public class properties {
 	@Test
 	public void ST_CoordDim() {
 
+		String wkt = "POINT(1 2)";
+		Geom geom = GeoFunctions.ST_GeomFromText(wkt);
+
+		int result = GeoFunctions.ST_CoordDim(geom);
+		assertEquals(2,result);
+		
+		 wkt = "LINESTRING(1 1 1, 2 1 2, 2 2 3, 1 2 4, 1 1 5)";
+		 geom = GeoFunctions.ST_GeomFromText(wkt);
+
+		 result = GeoFunctions.ST_CoordDim(geom);
+		assertEquals(3,result);
+		
+		 wkt = "LINESTRING(0 0 0, 1 1 2)";
+		 geom = GeoFunctions.ST_GeomFromText(wkt);
+
+		 result = GeoFunctions.ST_CoordDim(geom);
+		assertEquals(3,result);
+		
 	}
+	
+	
+	
+	@Test
+	public void ST_Dimension() {
+
+		String wkt = "POINT(1 2)";
+		Geom geom = GeoFunctions.ST_GeomFromText(wkt);
+
+		int result = GeoFunctions.ST_Dimension(geom);
+		assertEquals(0,result);
+		
+		 wkt = "LINESTRING(1 1 1, 2 1 2, 2 2 3, 1 2 4, 1 1 5)";
+		 geom = GeoFunctions.ST_GeomFromText(wkt);
+
+		 result = GeoFunctions.ST_Dimension(geom);
+		assertEquals(1,result);
+		
+		 wkt = "MULTIPOLYGON(((0 2, 3 2, 3 6, 0 6, 0 2)),((5 0, 7 0, 7 1, 5 1, 5 0)))";
+		 geom = GeoFunctions.ST_GeomFromText(wkt);
+
+		 result = GeoFunctions.ST_Dimension(geom);
+		assertEquals(2,result);
+		
+	}
+	
 
 	@Test
 	public void ST_InteriorRingN() {
@@ -127,17 +171,26 @@ public class properties {
 		assertEquals(2, GeoFunctions.ST_GeometryTypeCode(GeoFunctions.ST_GeomFromText("LINESTRING(1 3, 5 3)")));
 
 	}
-	
+
 	@Test
 	public void ST_GeometryN() {
 		String wkt = "MULTIPOINT((0 0), (1 6), (2 2), (1 2))";
 		Geom g = GeoFunctions.ST_GeomFromText(wkt, 4326);
-		
+
 		Geom result = GeoFunctions.ST_GeometryN(g, 1);
 		String strresult = result.g().toString();
 		assertEquals("POINT (1 6)", strresult);
 	}
-	
+
+	@Test
+	public void ST_PointOnSurface() {
+		String wkt = "POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))";
+		Geom g = GeoFunctions.ST_GeomFromText(wkt, 4326);
+
+		Geom result = GeoFunctions.ST_PointOnSurface(g);
+		String strresult = result.g().toString();
+		assertEquals("POINT (2.5 2.5)", strresult);
+	}
 
 	@Test
 	public void ST_Is3D() {
@@ -199,6 +252,15 @@ public class properties {
 	}
 
 	@Test
+	public void ST_SRID() {
+		String wkt = "LINESTRING(2 1, 1 3, 6 6, 2 1)";
+		Geom g = GeoFunctions.ST_GeomFromText(wkt, 4326);
+		int result = GeoFunctions.ST_SRID(g);
+		assertEquals(4326, result);
+
+	}
+
+	@Test
 	public void ST_IsSimple() {
 		// GeoFunctions.ST_Is3D(geom)
 		//
@@ -232,7 +294,7 @@ public class properties {
 		wkt = "POLYGON((0 0 1, 10 0 1, 10 5 1, 6 -2 1, 0 0 1))";
 		g = GeoFunctions.ST_GeomFromText(wkt, 4326);
 		result = GeoFunctions.ST_IsValidDetail(g);
-		
+
 		assertEquals(false, result[0]);
 		assertEquals("Self-intersection", result[1]);
 		assertEquals("POINT (7.142857142857143 0)", result[2].toString());
@@ -245,7 +307,6 @@ public class properties {
 		Geom g = GeoFunctions.ST_GeomFromText(wkt, 4326);
 		String result = GeoFunctions.ST_IsValidReason(g);
 		assertEquals("Valid Geometry", result);
-
 
 		wkt = "POLYGON((0 0 1, 10 0 1, 10 5 1, 6 -2 1, 0 0 1))";
 		g = GeoFunctions.ST_GeomFromText(wkt, 4326);
@@ -332,6 +393,25 @@ public class properties {
 	}
 
 	@Test
+	public void ST_PointN() {
+
+		// GeoFunctions.ST_StartPoint(geom)
+
+		Geom geom = GeoFunctions.ST_LineFromText("LINESTRING(-72.1260 42.45, -72.123 42.1546)");
+
+		Geom result = GeoFunctions.ST_PointN(geom, 1);
+
+		assertEquals("POINT (-72.126 42.45)", result.g().toString());
+
+		geom = GeoFunctions.ST_LineFromText("MULTILINESTRING((1 1, 1 6, 2 2, -1 2))");
+
+		result = GeoFunctions.ST_PointN(geom, 3);
+
+		assertEquals("POINT (2 2)", result.g().toString());
+
+	}
+
+	@Test
 	public void ST_EndPoint() {
 
 		// GeoFunctions.ST_StartPoint(geom)
@@ -394,6 +474,38 @@ public class properties {
 
 		Geom g = GeoFunctions.ST_PointFromText("POINT(40 50)");
 		assertEquals("50.0", Double.toString(GeoFunctions.ST_Y(g)));
+
+	}
+
+	@Test
+	public void ST_ZMin() {
+
+		// GeoFunctions.ST_X(geom)
+		Geom geom = GeoFunctions.ST_GeomFromText("LINESTRING(1 3 4, 5 6 7)");
+
+		Double result = GeoFunctions.ST_ZMin(geom);
+		assertEquals("4.0", Double.toString(result));
+
+		geom = GeoFunctions.ST_GeomFromText("LINESTRING(1 2 3, 4 5 6)");
+
+		result = GeoFunctions.ST_ZMin(geom);
+		assertEquals("3.0", Double.toString(result));
+
+	}
+
+	@Test
+	public void ST_ZMax() {
+
+		// GeoFunctions.ST_X(geom)
+		Geom geom = GeoFunctions.ST_GeomFromText("LINESTRING(1 3 4, 5 6 7)");
+
+		Double result = GeoFunctions.ST_ZMax(geom);
+		assertEquals("7.0", Double.toString(result));
+
+		geom = GeoFunctions.ST_GeomFromText("LINESTRING(1 2 3, 4 5 6)");
+
+		result = GeoFunctions.ST_ZMax(geom);
+		assertEquals("6.0", Double.toString(result));
 
 	}
 

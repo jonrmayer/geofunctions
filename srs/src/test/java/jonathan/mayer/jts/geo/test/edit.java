@@ -41,6 +41,20 @@ public class edit {
 	}
 	
 	@Test
+	public void ST_CollectionExtract() {
+
+//		GeoFunctions.ST_Densify(geom, tolerance)
+		
+		String wkt ="GEOMETRYCOLLECTION( MULTIPOINT((4 4), (1 1), (1 0), (0 3)),LINESTRING(2 6, 6 2),POLYGON((1 2, 4 2, 4 6, 1 6, 1 2)))";
+		
+		Geom g = GeoFunctions.ST_GeomFromText(wkt.toString());
+		Geom r = GeoFunctions.ST_CollectionExtract(g,2);
+		assertEquals("MULTILINESTRING ((2 6, 6 2))",
+				r.g().toString());
+		
+	}
+	
+	@Test
 	public void ST_Reverse() {
 
 //		GeoFunctions.ST_Densify(geom, tolerance)

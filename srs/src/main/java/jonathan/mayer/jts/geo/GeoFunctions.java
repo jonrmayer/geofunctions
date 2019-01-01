@@ -22,6 +22,7 @@ import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.IntersectionMatrix;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.MultiLineString;
@@ -47,6 +48,7 @@ import org.locationtech.jts.operation.valid.TopologyValidationError;
 import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
 import org.locationtech.jts.util.GeometricShapeFactory;
+import org.locationtech.jts.geom.util.AffineTransformation;
 import org.locationtech.jts.algorithm.MinimumBoundingCircle;
 import org.locationtech.jts.algorithm.MinimumDiameter;
 import org.locationtech.jts.densify.Densifier;
@@ -217,6 +219,27 @@ public class GeoFunctions {
 		return geom.wrap(result);
 	}
 
+	public static Geom ST_Rotate(Geom geom, double angle) {
+		Coordinate cp = geom.g().getEnvelopeInternal().centre();
+		Geometry result = GeometryEngine.rotate(geom.g(), angle, cp.x, cp.y);
+
+		return geom.wrap(result);
+	}
+
+	public static Geom ST_Rotate(Geom geom, double angle, double x, double y) {
+		Coordinate cp = geom.g().getEnvelopeInternal().centre();
+		Geometry result = GeometryEngine.rotate(geom.g(), angle, x, y);
+
+		return geom.wrap(result);
+	}
+
+	public static Geom ST_Scale(Geom geom, double xscale, double yscale) {
+
+		Geometry result = GeometryEngine.scale(geom.g(), xscale, yscale);
+
+		return geom.wrap(result);
+	}
+
 	public static Geom ST_PolyFromText(String wkt, int srid) {
 		final Geometry g = GeometryEngine.geometryFromWkt(wkt, GeometryType.POLYGON);
 		return bind(g, srid);
@@ -291,6 +314,18 @@ public class GeoFunctions {
 		return new SimpleGeom(result);
 	}
 
+	public static Geom ST_PointOnSurface(Geom geom) {
+
+		Geometry result = GeometryEngine.interiorpoint(geom.g());
+		return new SimpleGeom(result);
+	}
+
+	public static Geom ST_PointN(Geom geom, int n) {
+
+		Geometry result = GeometryEngine.pointn(geom.g(), n);
+		return new SimpleGeom(result);
+	}
+
 	public static Geom ST_MinimumRectangle(Geom geom) {
 
 		Geometry result = GeometryEngine.minimumRectangle(geom.g());
@@ -343,7 +378,27 @@ public class GeoFunctions {
 		for (Geom g : geoms) {
 			colgeoms.add(g.g());
 		}
-		Geometry result = GeometryEngine.makePolygon(geom.g(),colgeoms);
+		Geometry result = GeometryEngine.makePolygon(geom.g(), colgeoms);
+		return new SimpleGeom(result);
+	}
+
+	public static Geom ST_Accum(Geom... geoms) {
+		ArrayList<Geometry> colgeoms = new ArrayList<Geometry>();
+		for (Geom geom : geoms) {
+			colgeoms.add(geom.g());
+		}
+
+		Geometry result = GeometryEngine.collect(colgeoms);
+		return new SimpleGeom(result);
+	}
+	
+	public static Geom ST_Collect(Geom... geoms) {
+		ArrayList<Geometry> colgeoms = new ArrayList<Geometry>();
+		for (Geom geom : geoms) {
+			colgeoms.add(geom.g());
+		}
+
+		Geometry result = GeometryEngine.collect(colgeoms);
 		return new SimpleGeom(result);
 	}
 
@@ -367,25 +422,38 @@ public class GeoFunctions {
 	public static boolean ST_IsValid(Geom geom) {
 		return GeometryEngine.isvalid(geom.g());
 	}
+
 	public static Object[] ST_IsValidDetail(Geom geom) {
-		return GeometryEngine.isvaliddetail(geom.g(),false);
+		return GeometryEngine.isvaliddetail(geom.g(), false);
 	}
-	public static Object[] ST_IsValidDetail(Geom geom,boolean flag) {
-		return GeometryEngine.isvaliddetail(geom.g(),flag);
+
+	public static Object[] ST_IsValidDetail(Geom geom, boolean flag) {
+		return GeometryEngine.isvaliddetail(geom.g(), flag);
 	}
+
 	public static String ST_IsValidReason(Geom geom) {
-		return GeometryEngine.isvalidreasson(geom.g(),false);
+		return GeometryEngine.isvalidreasson(geom.g(), false);
 	}
-	public static String ST_IsValidReason(Geom geom,boolean flag) {
-		return GeometryEngine.isvalidreasson(geom.g(),flag);
+
+	public static String ST_IsValidReason(Geom geom, boolean flag) {
+		return GeometryEngine.isvalidreasson(geom.g(), flag);
 	}
-	
+
 	public static boolean ST_IsSimple(Geom geom) {
 		return GeometryEngine.issimple(geom.g());
 	}
 
 	public static boolean ST_IsClosed(Geom geom) {
 		return GeometryEngine.isclosed(geom.g());
+	}
+
+	public static boolean ST_IsCollection(Geom geom) {
+		return GeometryEngine.iscollection(geom.g());
+	}
+	
+	public static Geom ST_CollectionExtract(Geom geom, int dimension) {
+		Geometry result = GeometryEngine.collection_extract(geom.g(), dimension);
+		return new SimpleGeom(result);
 	}
 
 	public static boolean ST_IsEmpty(Geom geom) {
@@ -407,6 +475,16 @@ public class GeoFunctions {
 
 	public static Double ST_XMax(Geom geom) {
 		Double result = GeometryEngine.getxmax(geom.g());
+		return result;
+	}
+
+	public static Double ST_ZMax(Geom geom) {
+		Double result = GeometryEngine.getzmax(geom.g());
+		return result;
+	}
+
+	public static Double ST_ZMin(Geom geom) {
+		Double result = GeometryEngine.getzmin(geom.g());
 		return result;
 	}
 
@@ -500,6 +578,10 @@ public class GeoFunctions {
 		return GeometryEngine.coorddim(geom1.g());
 	}
 
+	public static int ST_Dimension(Geom geom1) {
+		return GeometryEngine.dimension(geom1.g());
+	}
+
 	public static boolean ST_Crosses(Geom geom1, Geom geom2) {
 		return GeometryEngine.crosses(geom1.g(), geom2.g());
 	}
@@ -534,9 +616,10 @@ public class GeoFunctions {
 
 	public static Geom ST_GeometryN(Geom geom, int n) {
 
-		Geometry result = GeometryEngine.getgeometryn(geom.g(),n);
+		Geometry result = GeometryEngine.getgeometryn(geom.g(), n);
 		return new SimpleGeom(result);
 	}
+
 	public static Geom ST_Force3D(Geom geom) {
 
 		Geometry result = GeometryEngine.force3d(geom.g());
@@ -555,6 +638,13 @@ public class GeoFunctions {
 
 	public static boolean ST_Touches(Geom geom1, Geom geom2) {
 		return GeometryEngine.touches(geom1.g(), geom2.g());
+	}
+	
+	public static boolean ST_Relate(Geom geom1, Geom geom2,String matrix) {
+		return GeometryEngine.relate(geom1.g(), geom2.g(),matrix);
+	}
+	public static String ST_Relate(Geom geom1, Geom geom2) {
+		return GeometryEngine.relate(geom1.g(), geom2.g());
 	}
 
 	/** Returns whether {@code geom1} is within {@code geom2}. */
@@ -628,6 +718,12 @@ public class GeoFunctions {
 
 	}
 
+	public static int ST_SRID(Geom geom) {
+
+		return GeometryEngine.getsrid(geom.g());
+
+	}
+
 	public static Geom ST_StartPoint(Geom geom) {
 
 		Geometry g = GeometryEngine.startpoint(geom.g());
@@ -687,6 +783,13 @@ public class GeoFunctions {
 	public static Geom ST_EndPoint(Geom geom) {
 
 		Geometry g = GeometryEngine.endpoint(geom.g());
+		return new SimpleGeom(g);
+
+	}
+
+	public static Geom ST_Translate(Geom geom, double xtrans, double ytrans) {
+
+		Geometry g = GeometryEngine.translate(geom.g(), xtrans, ytrans);
 		return new SimpleGeom(g);
 
 	}
@@ -1022,8 +1125,7 @@ public class GeoFunctions {
 			return result;
 
 		}
-		
-		
+
 		public static String isvalidreasson(Geometry geom, boolean slftouch) {
 			String result = null;
 			if (geom == null) {
@@ -1035,8 +1137,8 @@ public class GeoFunctions {
 			if (err != null) {
 				result = err.toString();
 			} else {
-				
-				result =  "Valid Geometry";
+
+				result = "Valid Geometry";
 			}
 
 			return result;
@@ -1075,6 +1177,28 @@ public class GeoFunctions {
 
 				}
 
+			}
+
+			return result;
+
+		}
+
+		public static Geometry interiorpoint(Geometry geom) {
+			if (geom == null) {
+				return null;
+			}
+			return geom.getInteriorPoint();
+		}
+
+		public static boolean iscollection(Geometry geom) {
+			boolean result = false;
+			if (geom == null) {
+				return result;
+			}
+
+			if (geom instanceof MultiPoint || geom instanceof MultiLineString || geom instanceof MultiPolygon
+					|| geom instanceof GeometryCollection) {
+				result = true;
 			}
 
 			return result;
@@ -1200,6 +1324,16 @@ public class GeoFunctions {
 			return result;
 		}
 
+		public static int getsrid(Geometry geom) {
+			if (geom == null) {
+				return 0;
+			}
+
+			int result = geom.getSRID();
+
+			return result;
+		}
+
 		public static Geometry startpoint(Geometry geom) {
 			if (geom == null) {
 				return null;
@@ -1209,6 +1343,36 @@ public class GeoFunctions {
 
 				LineString ls = (LineString) geom;
 				result = ls.getStartPoint();
+			}
+
+			return result;
+		}
+
+		public static Geometry pointn(Geometry geom, int pindex) {
+			Geometry result = null;
+
+			if (geom == null) {
+
+			}
+
+			if (geom instanceof LineString) {
+
+				LineString ls = (LineString) geom;
+				if (pindex <= 0 || pindex >= ls.getNumPoints()) {
+					return result;
+				} else {
+					result = ls.getPointN(pindex - 1);
+				}
+
+			} else if (geom instanceof MultiLineString) {
+				MultiLineString mls = (MultiLineString) geom;
+
+				LineString ls = (LineString) mls.getGeometryN(0);
+				if (pindex <= 0 || pindex >= ls.getNumPoints()) {
+					return result;
+				} else {
+					result = ls.getPointN(pindex - 1);
+				}
 			}
 
 			return result;
@@ -1413,7 +1577,26 @@ public class GeoFunctions {
 		}
 
 		public static int coorddim(Geometry geom) {
-			return geom.getDimension();
+
+			if (geom == null) {
+				return 0;
+			}
+			int result = 2;
+			if (hasZ(geom)) {
+				result = 3;
+			}
+
+			return result;
+		}
+
+		public static int dimension(Geometry geom) {
+
+			if (geom == null) {
+				return -1;
+			}
+			int result = geom.getDimension();
+
+			return result;
 		}
 
 		public static Boolean contains(Geometry geom1, Geometry geom2) {
@@ -1552,7 +1735,28 @@ public class GeoFunctions {
 
 			return result;
 		}
+		public static String relate(Geometry geom1,Geometry geom2) {
 
+			String result = null;
+
+			if (geom1 == null) {
+				return result;
+			}
+			result = geom1.relate(geom2).toString();
+
+			return result;
+		}
+		public static boolean relate(Geometry geom1,Geometry geom2,String matrix) {
+
+			boolean result = false;
+
+			if (geom1 == null) {
+				return result;
+			}
+			result = geom1.relate(geom2,matrix);
+
+			return result;
+		}
 		public static Geometry reverse(Geometry geom) {
 
 			Geometry result = null;
@@ -1561,6 +1765,44 @@ public class GeoFunctions {
 				return result;
 			}
 			result = geom.reverse();
+
+			return result;
+		}
+
+		public static Geometry scale(Geometry geom, double xscale, double yscale) {
+
+			Geometry result = null;
+
+			if (geom == null) {
+				return result;
+			}
+			result = AffineTransformation.scaleInstance(xscale, yscale).transform(geom);
+			// result = AffineTransformation.rotationInstance(angle, x, y).transform(geom);
+
+			return result;
+		}
+
+		public static Geometry rotate(Geometry geom, double angle, double x, double y) {
+
+			Geometry result = null;
+
+			if (geom == null) {
+				return result;
+			}
+			result = AffineTransformation.rotationInstance(angle, x, y).transform(geom);
+
+			return result;
+		}
+
+		public static Geometry translate(Geometry geom, double xscale, double yscale) {
+
+			Geometry result = null;
+
+			if (geom == null) {
+				return result;
+			}
+			AffineTransformation trans = AffineTransformation.translationInstance(xscale, yscale);
+			result = trans.transform(geom);
 
 			return result;
 		}
@@ -1579,12 +1821,13 @@ public class GeoFunctions {
 
 			return result;
 		}
+
 		public static Geometry getgeometryn(Geometry geom, int n) {
 			Geometry result = null;
 			if (geom == null) {
 				return result;
 			}
-			if(geom instanceof GeometryCollection) {
+			if (geom instanceof GeometryCollection) {
 				result = geom.getGeometryN(n);
 			}
 
@@ -1669,15 +1912,106 @@ public class GeoFunctions {
 			return geometryFactory.createPoint(new Coordinate(x, y, z));
 		}
 
-		public static Geometry[] accum(Geom[] geoms) {
-
-			return null;
+		public static Geometry collect(ArrayList<Geometry> geoms) {
+			Geometry result = null;
+			ArrayList<Geometry> rgeoms = new ArrayList<Geometry>();
+			for (int i = 0; i < geoms.size(); i++) {
+				Geometry ngeom = geoms.get(i);
+				rgeoms.addAll(extract(ngeom));
+			}
+			int pts =0;
+			int lines = 0;
+			int polys =0;
+			int allg = 0;
+			for (int i = 0; i < rgeoms.size(); i++) {
+				Geometry ngeom = rgeoms.get(i);
+				
+				if (ngeom instanceof Point) {
+					pts+=1;
+				}else if (ngeom instanceof LineString) {
+					lines+=1;
+				}else if (ngeom instanceof Polygon) {
+					polys+=1;
+				}
+			}
+			allg = pts + lines+polys;
+			if(pts==allg) {
+				result = geometryFactory.createMultiPoint(rgeoms.toArray(new Point[0]));
+			}else if(lines==allg) {
+				result = geometryFactory.createMultiLineString(rgeoms.toArray(new LineString[0]));
+			}else if(polys==allg) {
+				result = geometryFactory.createMultiPolygon(rgeoms.toArray(new Polygon[0]));
+			}else {
+				
+				result = geometryFactory.createGeometryCollection(rgeoms.toArray(new Geometry[0]));	
+			}
+			
+					
+			return result;
 
 		}
 
-		public static Geometry[] collect(Geom[] geoms) {
+		public static ArrayList<Geometry> extract(Geometry geom) {
+			ArrayList<Geometry> result = new ArrayList<Geometry>();
+			if (iscollection(geom)) {
+				for (int i = 0; i < numgeometries(geom); i++) {
+					Geometry ngeom = getgeometryn(geom, i);
+					if (iscollection(ngeom)) {
+						result.addAll(extract(ngeom));
+					} else {
+						result.add(ngeom);
+					}
 
-			return null;
+				}
+			} else {
+				result.add(geom);
+			}
+
+			return result;
+
+		}
+
+		public static Geometry collection_extract(Geometry geom, int dimension) {
+			Geometry result = null;
+
+			if (geom == null) {
+				return result;
+			}
+
+			if (dimension >= 1 && dimension >= 3) {
+				return result;
+			}
+			ArrayList<Geometry> extractgeoms = extract(geom);
+			ArrayList<Geometry> rgeoms = new ArrayList<Geometry>();
+			for (int i = 0; i < extractgeoms.size(); i++) {
+				Geometry g = extractgeoms.get(i);
+				if (dimension == 1) {
+					if (g instanceof Point) {
+						rgeoms.add(g);
+					}
+
+				} else if (dimension == 2) {
+					if (g instanceof LineString) {
+						rgeoms.add(g);
+					}
+
+				} else if (dimension == 3) {
+					if (g instanceof Polygon) {
+						rgeoms.add(g);
+					}
+
+				}
+
+			}
+			if (dimension == 1) {
+				result = geom.getFactory().createMultiPoint(rgeoms.toArray(new Point[0]));
+			} else if (dimension == 2) {
+				result = geom.getFactory().createMultiLineString(rgeoms.toArray(new LineString[0]));
+			} else if (dimension == 3) {
+				result = geom.getFactory().createMultiPolygon(rgeoms.toArray(new Polygon[0]));
+			}
+
+			return result;
 
 		}
 
@@ -1689,6 +2023,60 @@ public class GeoFunctions {
 
 			Double result = geom.getArea();
 			return result;
+		}
+
+		public static double getzmax(Geometry geom) {
+
+			double result = Double.NaN;
+			if (geom == null) {
+				return result;
+			}
+			if (hasZ(geom)) {
+				Coordinate[] coords = geom.getCoordinates();
+				result = coords[0].z;
+
+				for (int i = 0; i < coords.length; i++) {
+					double z = coords[i].z;
+					if (!(Double.isNaN(z))) {
+						if (z > result) {
+							result = z;
+						}
+					}
+
+				}
+			} else {
+				return result;
+			}
+
+			return result;
+
+		}
+
+		public static double getzmin(Geometry geom) {
+
+			double result = Double.NaN;
+			if (geom == null) {
+				return result;
+			}
+			if (hasZ(geom)) {
+				Coordinate[] coords = geom.getCoordinates();
+				result = coords[0].z;
+
+				for (int i = 0; i < coords.length; i++) {
+					double z = coords[i].z;
+					if (!(Double.isNaN(z))) {
+						if (z < result) {
+							result = z;
+						}
+					}
+
+				}
+			} else {
+				return result;
+			}
+
+			return result;
+
 		}
 
 		public static Double getxmax(Geometry geom) {
@@ -1990,25 +2378,25 @@ public class GeoFunctions {
 				if (closed) {
 					LineString ls = (LineString) geom;
 					LinearRing shell = geom.getFactory().createLinearRing(ls.getCoordinateSequence());
-					
-					if(gholes.size()==0) {
+
+					if (gholes.size() == 0) {
 						result = geom.getFactory().createPolygon(shell, null);
-					}else {
+					} else {
 						List<LinearRing> innershells = new LinkedList<LinearRing>();
-					
-						for(Geometry hgeom:gholes) {
+
+						for (Geometry hgeom : gholes) {
 							boolean iclosed = isclosed(hgeom);
 							if (iclosed) {
 								LineString ils = (LineString) hgeom;
 								LinearRing ishell = geom.getFactory().createLinearRing(ils.getCoordinateSequence());
 								innershells.add(ishell);
 							}
-							
+
 						}
 						result = geom.getFactory().createPolygon(shell, innershells.toArray(new LinearRing[0]));
-						
+
 					}
-					
+
 				} else {
 					return result;
 				}
