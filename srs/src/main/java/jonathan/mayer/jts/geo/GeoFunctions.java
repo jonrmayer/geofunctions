@@ -12,6 +12,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static java.lang.Math.abs;
+import static java.lang.Math.acos;
+import static java.lang.Math.atan;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.sqrt;
+import static java.lang.Math.toDegrees;
+import static java.lang.Math.toRadians;
+
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.locationtech.jts.geom.Coordinate;
@@ -41,6 +50,7 @@ import org.locationtech.jts.io.gml2.GMLWriter;
 import org.locationtech.jts.io.kml.KMLWriter;
 
 import org.locationtech.jts.io.geojson.GeoJsonReader;
+import org.locationtech.jts.operation.distance.DistanceOp;
 import org.locationtech.jts.operation.overlay.snap.GeometrySnapper;
 import org.locationtech.jts.operation.union.UnaryUnionOp;
 import org.locationtech.jts.operation.valid.IsValidOp;
@@ -71,23 +81,35 @@ public class GeoFunctions {
 	}
 
 	public static Double ST_Area(Geom geom1) {
-		return GeometryEngine.getarea(geom1.g());
+		double result = GeometryEngine.getarea(geom1.g());
+		return result;
+	}
+
+	public static Double ST_Azimuth(Geom geom1, Geom geom2) {
+
+		double result = GeometryEngine.getazimuth(geom1.g(), geom2.g());
+
+		return result;
 	}
 
 	public static String ST_GoogleMapLink(Geom geom, String layerType, int zoom) {
-		return GeometryEngine.googlemaplink(geom.g(), layerType, zoom);
+		String result = GeometryEngine.googlemaplink(geom.g(), layerType, zoom);
+		return result;
 	}
 
 	public static String ST_OSMMapLink(Geom geom, boolean marker) {
-		return GeometryEngine.osmmaplink(geom.g(), marker);
+		String result = GeometryEngine.osmmaplink(geom.g(), marker);
+		return result;
 	}
 
 	public static String ST_AsText(Geom g) {
-		return ST_AsWKT(g);
+		String result = ST_AsWKT(g);
+		return result;
 	}
 
 	public static String ST_AsWKT(Geom g) {
-		return GeometryEngine.geometryToWkt(g.g());
+		String result = GeometryEngine.geometryToWkt(g.g());
+		return result;
 	}
 
 	public static String ST_AsGeoJSON(Geom g, boolean EncodeCRS) {
@@ -112,7 +134,9 @@ public class GeoFunctions {
 	}
 
 	public static byte[] ST_AsBinary(Geom g) {
-		return GeometryEngine.geometryToWkb(g.g());
+
+		byte[] result = GeometryEngine.geometryToWkb(g.g());
+		return result;
 	}
 
 	public static byte[] ST_AsWKB(Geom g) {
@@ -391,7 +415,7 @@ public class GeoFunctions {
 		Geometry result = GeometryEngine.collect(colgeoms);
 		return new SimpleGeom(result);
 	}
-	
+
 	public static Geom ST_Collect(Geom... geoms) {
 		ArrayList<Geometry> colgeoms = new ArrayList<Geometry>();
 		for (Geom geom : geoms) {
@@ -450,9 +474,14 @@ public class GeoFunctions {
 	public static boolean ST_IsCollection(Geom geom) {
 		return GeometryEngine.iscollection(geom.g());
 	}
-	
+
 	public static Geom ST_CollectionExtract(Geom geom, int dimension) {
 		Geometry result = GeometryEngine.collection_extract(geom.g(), dimension);
+		return new SimpleGeom(result);
+	}
+
+	public static Geom ST_ClosestPoint(Geom geom1, Geom geom2) {
+		Geometry result = GeometryEngine.closestpoint(geom1.g(), geom2.g());
 		return new SimpleGeom(result);
 	}
 
@@ -639,10 +668,11 @@ public class GeoFunctions {
 	public static boolean ST_Touches(Geom geom1, Geom geom2) {
 		return GeometryEngine.touches(geom1.g(), geom2.g());
 	}
-	
-	public static boolean ST_Relate(Geom geom1, Geom geom2,String matrix) {
-		return GeometryEngine.relate(geom1.g(), geom2.g(),matrix);
+
+	public static boolean ST_Relate(Geom geom1, Geom geom2, String matrix) {
+		return GeometryEngine.relate(geom1.g(), geom2.g(), matrix);
 	}
+
 	public static String ST_Relate(Geom geom1, Geom geom2) {
 		return GeometryEngine.relate(geom1.g(), geom2.g());
 	}
@@ -754,7 +784,7 @@ public class GeoFunctions {
 
 	public static Geom ST_SymDifference(Geom geom1, Geom geom2) {
 
-		Geometry g = GeometryEngine.symmdifference(geom1.g(), geom1.g());
+		Geometry g = GeometryEngine.symmdifference(geom1.g(), geom2.g());
 		return new SimpleGeom(g);
 
 	}
@@ -775,7 +805,7 @@ public class GeoFunctions {
 
 	public static Geom ST_Difference(Geom geom1, Geom geom2) {
 
-		Geometry g = GeometryEngine.difference(geom1.g(), geom1.g());
+		Geometry g = GeometryEngine.difference(geom1.g(), geom2.g());
 		return new SimpleGeom(g);
 
 	}
@@ -1576,6 +1606,37 @@ public class GeoFunctions {
 			return geom1.covers(geom2);
 		}
 
+		public static Geometry closestpoint(Geometry geom1, Geometry geom2) {
+			Geometry result = null;
+
+			if (geom1 == null || geom2 == null) {
+				return null;
+			}
+
+			Coordinate[] coords = DistanceOp.nearestPoints(geom1, geom2);
+			if (coords.length >= 1) {
+				result = geometryFactory.createPoint(coords[0]);
+			}
+
+			return result;
+		}
+
+		public static Geometry longestline(Geometry geom1, Geometry geom2) {
+			Geometry result = null;
+
+			if (geom1 == null || geom2 == null) {
+				return null;
+			}
+
+			// Coordinate[] coords = new MaxDistanceOp(geom1,
+			// geom2).getCoordinatesDistance();
+			// if(coords.length>=1) {
+			// result = geometryFactory.createPoint(coords[0]);
+			// }
+
+			return result;
+		}
+
 		public static int coorddim(Geometry geom) {
 
 			if (geom == null) {
@@ -1626,7 +1687,8 @@ public class GeoFunctions {
 			if (geom1 == null || geom2 == null) {
 				return result;
 			}
-			return geom1.difference(geom2);
+			result = geom1.difference(geom2);
+			return result;
 		}
 
 		public static Geometry intersection(Geometry geom1, Geometry geom2) {
@@ -1735,7 +1797,8 @@ public class GeoFunctions {
 
 			return result;
 		}
-		public static String relate(Geometry geom1,Geometry geom2) {
+
+		public static String relate(Geometry geom1, Geometry geom2) {
 
 			String result = null;
 
@@ -1746,17 +1809,19 @@ public class GeoFunctions {
 
 			return result;
 		}
-		public static boolean relate(Geometry geom1,Geometry geom2,String matrix) {
+
+		public static boolean relate(Geometry geom1, Geometry geom2, String matrix) {
 
 			boolean result = false;
 
 			if (geom1 == null) {
 				return result;
 			}
-			result = geom1.relate(geom2,matrix);
+			result = geom1.relate(geom2, matrix);
 
 			return result;
 		}
+
 		public static Geometry reverse(Geometry geom) {
 
 			Geometry result = null;
@@ -1919,34 +1984,33 @@ public class GeoFunctions {
 				Geometry ngeom = geoms.get(i);
 				rgeoms.addAll(extract(ngeom));
 			}
-			int pts =0;
+			int pts = 0;
 			int lines = 0;
-			int polys =0;
+			int polys = 0;
 			int allg = 0;
 			for (int i = 0; i < rgeoms.size(); i++) {
 				Geometry ngeom = rgeoms.get(i);
-				
+
 				if (ngeom instanceof Point) {
-					pts+=1;
-				}else if (ngeom instanceof LineString) {
-					lines+=1;
-				}else if (ngeom instanceof Polygon) {
-					polys+=1;
+					pts += 1;
+				} else if (ngeom instanceof LineString) {
+					lines += 1;
+				} else if (ngeom instanceof Polygon) {
+					polys += 1;
 				}
 			}
-			allg = pts + lines+polys;
-			if(pts==allg) {
+			allg = pts + lines + polys;
+			if (pts == allg) {
 				result = geometryFactory.createMultiPoint(rgeoms.toArray(new Point[0]));
-			}else if(lines==allg) {
+			} else if (lines == allg) {
 				result = geometryFactory.createMultiLineString(rgeoms.toArray(new LineString[0]));
-			}else if(polys==allg) {
+			} else if (polys == allg) {
 				result = geometryFactory.createMultiPolygon(rgeoms.toArray(new Polygon[0]));
-			}else {
-				
-				result = geometryFactory.createGeometryCollection(rgeoms.toArray(new Geometry[0]));	
+			} else {
+
+				result = geometryFactory.createGeometryCollection(rgeoms.toArray(new Geometry[0]));
 			}
-			
-					
+
 			return result;
 
 		}
@@ -2523,6 +2587,70 @@ public class GeoFunctions {
 			Geometry geom = geometryFactory.createPolygon(coordArray);
 			geom.setSRID(srid);
 			return geom;
+		}
+
+		public static double getazimuth(Geometry geom1, Geometry geom2) {
+
+			double result = Double.NaN;
+			if (geom1 == null || geom1 == null) {
+				return result;
+			}
+
+			if (geom1 instanceof Point && geom2 instanceof Point) {
+				Point p1 = (Point) geom1;
+				Point p2 = (Point) geom2;
+				Coordinate coord1 = p1.getCoordinate();
+				Coordinate coord2 = p2.getCoordinate();
+
+				if (coord1.x == coord2.x) {
+					if (coord1.y == coord2.y) {
+
+						return result;
+					} else if (coord1.y < coord2.y) {
+						result = 0.0;
+					} else if (coord1.y > coord2.y) {
+						result = 180.0;
+					}
+				}
+
+				if (coord1.y == coord2.y) {
+					if (coord1.x < coord2.x) {
+						result = 90.0;
+					} else if (coord1.x > coord2.x) {
+						result = 270.0;
+					}
+				}
+
+				if (coord1.x < coord2.x && coord1.y < coord2.y) {
+					double tanA = (coord2.x - coord1.x) / (coord2.y - coord1.y);
+					double atan = atan(tanA);
+					result = toDegrees(atan);
+				}
+
+				if (coord1.x < coord2.x && coord1.y > coord2.y) {
+					double tanA = (coord1.y - coord2.y) / (coord2.x - coord1.x);
+					double atan = atan(tanA);
+					result = toDegrees(atan) + 90.0;
+				}
+
+				if (coord1.x > coord2.x && coord1.y > coord2.y) {
+					double tanA = (coord1.x - coord2.x) / (coord1.y - coord2.y);
+					double atan = atan(tanA);
+					result = toDegrees(atan) + 180;
+				}
+
+				if (coord1.x > coord2.x && coord1.y < coord2.y) {
+					double tanA = (coord2.y - coord1.y) / (coord1.x - coord2.x);
+					double atan = atan(tanA);
+					result = toDegrees(atan) + 270;
+				}
+
+			} else {
+				return result;
+			}
+
+			return result;
+
 		}
 
 		public static Geometry boundingcircle(Geometry geom) {
