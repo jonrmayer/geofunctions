@@ -69,7 +69,19 @@ public class predicates {
 				GeoFunctions.ST_GeomFromText("LINESTRING(1 1, 5 2, 2 5)")));
 
 	}
+	
+	@Test
+	public void ST_Difference() {
+		// GeoFunctions.ST_Disjoint(geom1, geom2)
+		assertEquals("POLYGON ((7 2, 7 1, 1 1, 1 6, 3 6, 3 2, 7 2))", 
+				GeoFunctions.ST_Difference(
+						GeoFunctions.ST_GeomFromText("POLYGON((1 1, 7 1, 7 6, 1 6, 1 1))"),
+				GeoFunctions.ST_GeomFromText("POLYGON((3 2, 8 2, 8 8, 3 8, 3 2))")
+				).g().toString());
+	
 
+	}
+//	POLYGON((1 1, 7 1, 7 6, 1 6, 1 1))	POLYGON((3 2, 8 2, 8 8, 3 8, 3 2))
 	
 
 	@Test
@@ -125,7 +137,17 @@ public class predicates {
 
 	}
 	
+	@Test
+	public void ST_SymDifference() {
+		// GeoFunctions.ST_Disjoint(geom1, geom2)
+		assertEquals("MULTIPOLYGON (((7 2, 7 1, 1 1, 1 6, 3 6, 3 2, 7 2)), ((7 2, 7 6, 3 6, 3 8, 8 8, 8 2, 7 2)))", 
+				GeoFunctions.ST_SymDifference(
+						GeoFunctions.ST_GeomFromText("POLYGON((1 1, 7 1, 7 6, 1 6, 1 1))"),
+				GeoFunctions.ST_GeomFromText("POLYGON((3 2, 8 2, 8 8, 3 8, 3 2))")
+				).g().toString());
 	
+
+	}
 	
 	@Test
 	public void ST_Touches() {
