@@ -123,6 +123,27 @@ public class predicates {
 				GeoFunctions.ST_GeomFromText("LINESTRING(1 3, 5 3)")));
 	
 	}
+	
+	@Test
+	public void ST_Relate() {
+//		SELECT ST_Relate('LINESTRING(1 2, 3 4)',
+//                'LINESTRING(5 6, 7 3)');
+//		
+		
+		Geom l1 = GeoFunctions.ST_GeomFromText("LINESTRING(1 2, 3 4)");
+		Geom l2 = GeoFunctions.ST_GeomFromText("LINESTRING(5 6, 7 3)");
+		String result = GeoFunctions.ST_Relate(l1, l2);
+		assertEquals("FF1FF0102", result);
+		
+//		SELECT ST_Relate('POLYGON((1 1, 4 1, 4 5, 1 5, 1 1))',
+//                'POLYGON((3 2, 6 2, 6 6, 3 6, 3 2))',
+//                '212101212');
+		
+		Geom p1 = GeoFunctions.ST_GeomFromText("POLYGON((1 1, 4 1, 4 5, 1 5, 1 1))");
+		Geom p2 = GeoFunctions.ST_GeomFromText("POLYGON((3 2, 6 2, 6 6, 3 6, 3 2))");
+		Boolean resultb = GeoFunctions.ST_Relate(p1, p2,"212101212");
+		assertEquals(true, resultb);
+	}
 
 	
 	@Test

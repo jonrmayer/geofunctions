@@ -297,6 +297,11 @@ public class GeoFunctions {
 		return geom.wrap(g);
 	}
 
+	public static Geom ST_Holes(Geom geom) {
+		final Geometry g = GeometryEngine.getHoles(geom.g());
+		return geom.wrap(g);
+	}
+
 	public static int ST_NumGeometries(Geom geom) {
 		return GeometryEngine.numgeometries(geom.g());
 	}
@@ -1681,6 +1686,16 @@ public class GeoFunctions {
 			return geom.convexHull();
 		}
 
+		public static Geometry concavehull(Geometry geom, double tolerance) {
+			Geometry result = null;
+
+			if (geom == null) {
+				return result;
+			}
+
+			return null;
+		}
+
 		public static Geometry difference(Geometry geom1, Geometry geom2) {
 			Geometry result = null;
 
@@ -1887,12 +1902,73 @@ public class GeoFunctions {
 			return result;
 		}
 
+		public static Geometry getHoles(Geometry geom) {
+			Geometry result = null;
+			if (geom == null) {
+				return result;
+			}
+			final ArrayList<Geometry> holes = new ArrayList<Geometry>();
+
+			for (int i = 0; i < numgeometries(geom); i++) {
+				Geometry ngeom = getgeometryn(geom, i);
+				// nrings
+				for (int j = 0; j < nInteriorRings(ngeom); j++) {
+					LinearRing ring = (LinearRing) getInteriorRingN(ngeom, j + 1);
+
+					holes.add(geometryFactory.createPolygon(ring));
+				}
+
+			}
+			result = geometryFactory.createGeometryCollection(holes.toArray(new Geometry[0]));
+			return result;
+		}
+		
+		public static Geometry removeHoles(Geometry geom) {
+			Geometry result = null;
+			if (geom == null) {
+				return result;
+			}
+			final ArrayList<Geometry> erings = new ArrayList<Geometry>();
+			
+			 if(geom instanceof Polygon) {
+				erings.add(exteriorring(geom));
+			}else if(geom instanceof MultiPolygon) {
+				for (int i = 0; i < numgeometries(geom); i++) {
+					
+					Geometry ngeom = getgeometryn(geom, i);
+					if(ngeom instanceof Polygon) {
+						erings.add(exteriorring(geom));
+					}
+					
+				}
+			}else if(geom instanceof GeometryCollection) {
+				
+			}
+			
+//			exteriorring
+
+//			for (int i = 0; i < numgeometries(geom); i++) {
+//				Geometry ngeom = getgeometryn(geom, i);
+//				// nrings
+//				for (int j = 0; j < nInteriorRings(ngeom); j++) {
+//					LinearRing ring = (LinearRing) getInteriorRingN(ngeom, j + 1);
+//
+//					holes.add(geometryFactory.createPolygon(ring));
+//				}
+//
+//			}
+//			result = geometryFactory.createGeometryCollection(holes.toArray(new Geometry[0]));
+			return result;
+		}
+
 		public static Geometry getgeometryn(Geometry geom, int n) {
 			Geometry result = null;
 			if (geom == null) {
 				return result;
 			}
-			if (geom instanceof GeometryCollection) {
+			if (geom instanceof GeometryCollection || geom instanceof MultiPolygon || geom instanceof MultiLineString
+					|| geom instanceof MultiPoint || geom instanceof Polygon || geom instanceof LineString
+					|| geom instanceof Point) {
 				result = geom.getGeometryN(n);
 			}
 

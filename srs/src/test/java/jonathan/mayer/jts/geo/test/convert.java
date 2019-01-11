@@ -204,6 +204,18 @@ public class convert {
 
 		assertEquals("https://maps.google.com/maps?ll=47.21614405793608,-1.5491151739830435&z=19&t=m", result);
 	}
+	@Test
+	public void ST_Holes() {
+
+		String wkt = "POLYGON((0 0, 10 0, 10 5, 0 5, 0 0),(1 1, 2 1, 2 4, 1 4, 1 1))";
+		Geom g = GeoFunctions.ST_GeomFromText(wkt);
+
+		Geom result = GeoFunctions.ST_Holes(g);
+
+		assertEquals("GEOMETRYCOLLECTION (POLYGON ((1 1, 2 1, 2 4, 1 4, 1 1)))", result.g().toString());
+	}
+	
+//	
 
 	@Test
 	public void ST_OSMMapLink() {
